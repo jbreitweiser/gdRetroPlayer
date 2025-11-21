@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://didpfqa11i68r"]
+
+[ext_resource type="Script" uid="uid://b87h6q2xn8do3" path="res://main.gd" id="1_ig7tw"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_ig7tw")
+
+[node name="BoxContainer" type="BoxContainer" parent="."]
+offset_right = 1182.0
+offset_bottom = 658.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureRect" type="TextureRect" parent="BoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+stretch_mode = 5

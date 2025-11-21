@@ -5,7 +5,7 @@ import sys
 from methods import print_error
 
 
-libname = "RetroPlayer"
+libname = "EXTENSION-NAME"
 projectdir = "demo"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
@@ -37,12 +37,7 @@ Run the following command to download godot-cpp:
 
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
 
-# Build lrcpp as a static library
-env.Append(CPPPATH=["src/", "lrcpp/include/"])
-lrcpp_sources = Glob("lrcpp/src/*.cpp")
-lrcpp_lib = env.StaticLibrary("bin/lrcpp", source=lrcpp_sources)
-
-# Main extension sources
+env.Append(CPPPATH=["src/"])
 sources = Glob("src/*.cpp")
 
 if env["target"] in ["editor", "template_debug"]:
@@ -58,15 +53,10 @@ suffix = env['suffix'].replace(".dev", "").replace(".universal", "")
 
 lib_filename = "{}{}{}{}".format(env.subst('$SHLIBPREFIX'), libname, suffix, env.subst('$SHLIBSUFFIX'))
 
-# Link against lrcpp static library
 library = env.SharedLibrary(
     "bin/{}/{}".format(env['platform'], lib_filename),
     source=sources,
-    LIBS=[lrcpp_lib] + env.get('LIBS', []),
 )
-
-# Ensure lrcpp builds first
-env.Depends(library, lrcpp_lib)
 
 copy = env.Install("{}/bin/{}/".format(projectdir, env["platform"]), library)
 
