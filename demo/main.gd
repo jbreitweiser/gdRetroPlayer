@@ -17,56 +17,42 @@ var content_name: String = "arcade - FB NEO\\ddragon.zip"
 var content_path: String = "C:\\roms\\"
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	## Connect the joypad attached/detatched signal
 	Input.joy_connection_changed.connect(initialize_controllers)
 	
+	## initialize the attached controllers
 	var connected = Input.get_connected_joypads()
 	if connected.size() > 0:
 		for id in connected:
 			initialize_controllers(id, true)
 	
+	## Initialize the core and selected content
 	retro_player.player_init([], core_path + core_name, content_path + content_name, 1)
 	retro_player.set_texture_rect(texture_rect);
+	retro_player.set_audio_player(audio_stream_player_2d)
 
-	#init_audio(retro_player.get_core_sample_rate())
-	#audio_stream_player_2d.play()
-	#audio_playback = audio_stream_player_2d.get_stream_playback()
-	
-	
-func init_audio(sample_rate: float)-> void:
-	audio_stream_generator = AudioStreamGenerator.new()
-	audio_stream_generator.mix_rate = sample_rate
-	## audio_stream_generator.mix_target = AudioStreamGenerator.MIX_TARGET_STEREO # Stereo output
-	audio_stream_player_2d.stream = audio_stream_generator
+func initialize_controllers(id: int, connected: bool) -> void:
+	if connected:
+		var event = {
+			"event": "InitializeControllerEvent",
+			"device" : id,
+		   	"joypad_name" : Input.get_joy_name(id)
+		}
+		retro_player.input(event)
+	else:
+		## need to add deinit of joypad
+		pass
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("quit_game"):
 		retro_player.quit()
 		get_tree().quit()
 	else:
 		run_frame()
-	
-	## Get audio samples and push to stream
-	#var samples: PackedFloat32Array = retro_player.get_audio_samples()
-	#@warning_ignore("integer_division")
-	#var frame_count = samples.size() / 2
-#
-	## print("Audio samples=", samples, "  frame_count", frame_count)
-	#if frame_count > 0:
-		#var buffer = PackedVector2Array()
-		#buffer.resize(frame_count)
-		#for i in range(0, frame_count - 2, 2):  
-			#var left_frame = samples[i*2]
-			#var right_frame = samples[(i*2)+1]
-			#buffer[i] = Vector2(left_frame, right_frame)
-		#audio_playback.push_buffer(buffer)
-		#retro_player.clear_audio_buffer()
+
 
 func run_frame() -> void:
 	retro_player.run()
-	#var buffer: Image = retro_player.get_frame_buffer()
-	#var tex = ImageTexture.create_from_image(buffer)
-	#texture_rect.texture = tex
 
 ##  The input method will accept the input event as a dictionary object
 ##  {"event" : Pass the event class name,
@@ -99,16 +85,3 @@ func _input(event: InputEvent) ->void:
 		return
 	
 	retro_player.forward_input(event)
-	
-	
-func initialize_controllers(id: int, connected: bool) -> void:
-	if connected:
-		var event = {
-			"event": "InitializeControllerEvent",
-			"device" : id,
-		   	"joypad_name" : Input.get_joy_name(id)
-		}
-		retro_player.input(event)
-	else:
-		## need to add deinit of joypad
-		pass

@@ -17,6 +17,7 @@
 #include <godot_cpp/classes/wrapped.hpp>
 #include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/classes/texture_rect.hpp>
+#include <godot_cpp/classes/audio_stream_player2d.hpp>
 
 using namespace godot;
 
@@ -34,11 +35,9 @@ public:
     void run();
     void forwarded_input( const Ref<InputEvent> &event );
     void input( const Dictionary &event );
-    Ref<Image> get_frame_buffer();
-    PackedFloat32Array get_audio_samples();
-    void clear_audio_buffer();
     double getCoreSampleRate();
     void set_texture_rect(TextureRect *rect);
+    void set_audio_player(godot::AudioStreamPlayer2D *player);
 
 
 

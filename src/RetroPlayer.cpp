@@ -277,29 +277,12 @@ void const* RetroPlayer::readAll(char const* path, size_t* size) {
     return data;
 }
 
-godot::Ref<godot::Image> RetroPlayer::get_frame_buffer()
-{
-    return _video.get_frame_buffer();
-}
-
 void RetroPlayer::set_texture_rect(godot::TextureRect *rect) {
     _video.set_texture_rect(rect);
 }
 
-godot::PackedFloat32Array RetroPlayer::get_audio_samples() {
-    const auto& samples = _audio.getSamples();
-    PackedFloat32Array result;
-    result.resize(samples.size());
-    
-    // Convert int16_t to float (-1.0 to 1.0)
-    for (size_t i = 0; i < samples.size(); ++i) {
-        result[i] = (float)samples[i] / 32768.0f;
-    }
-    return result;
-}
-
-void RetroPlayer::clear_audio_buffer() {
-    _audio.clearSamples();
+void RetroPlayer::set_audio_player(godot::AudioStreamPlayer2D *player) {
+    _audio.set_audio_player(player);
 }
 
 double RetroPlayer::getCoreSampleRate() {
@@ -310,10 +293,8 @@ void RetroPlayer::_bind_methods()
 {   
     godot::ClassDB::bind_method( godot::D_METHOD( "player_init", "configPaths", "corePath", "contentPath", "verboseness" ), &RetroPlayer::player_init );
     godot::ClassDB::bind_method( godot::D_METHOD( "run" ), &RetroPlayer::run );
-    godot::ClassDB::bind_method( godot::D_METHOD( "get_frame_buffer" ), &RetroPlayer::get_frame_buffer );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_texture_rect", "texture_rect" ), &RetroPlayer::set_texture_rect );
-    godot::ClassDB::bind_method( godot::D_METHOD( "get_audio_samples" ), &RetroPlayer::get_audio_samples );
-    godot::ClassDB::bind_method( godot::D_METHOD( "clear_audio_buffer" ), &RetroPlayer::clear_audio_buffer );
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_audio_player", "audio_player" ), &RetroPlayer::set_audio_player );
     godot::ClassDB::bind_method( godot::D_METHOD( "forward_input", "event" ), &RetroPlayer::forwarded_input );
     godot::ClassDB::bind_method( godot::D_METHOD( "input", "event" ), &RetroPlayer::input );
     godot::ClassDB::bind_method( godot::D_METHOD( "quit" ), &RetroPlayer::destroy );

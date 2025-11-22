@@ -27,15 +27,21 @@ void Audio::clear() {
 }
 
 void Audio::present() {
-    // _logger->debug("Audio Not implemented");
-}
+    // Push queued samples to audio playback if available
+    if (_audio_playback == nullptr) {
+        return;
+    }
 
-const std::vector<int16_t>& Audio::getSamples() const {
-    return _samples;
-}
+    size_t frames =  _samples.size();
 
-void Audio::clearSamples() {
+    if (frames == 0) {
+        return;
+    }
+
+    _audio_playback->push_buffer(_samples);
+
     _samples.clear();
+
 }
 
 bool Audio::setSystemAvInfo(retro_system_av_info const* info) {
@@ -50,12 +56,50 @@ bool Audio::setAudioCallback(retro_audio_callback const* callback) {
     return true;
 }
 
-size_t Audio::sampleBatch(int16_t const* data, size_t frames) {
-    size_t const size = _samples.size();
-    _samples.resize(size + frames * 2);
-    memcpy(_samples.data() + size, data, frames * 4);
+void Audio::set_audio_player(godot::AudioStreamPlayer2D *player) {
+    _audio_player = player;
 
-    _logger->debug("%zu audio frames queued", frames);
+    if (_audio_player == nullptr) {
+        _audio_generator.unref();
+        _audio_playback = nullptr;
+        return;
+    }
+
+    // instantiate an AudioStreamGenerator and set it as the player's stream
+    godot::Ref<godot::AudioStreamGenerator> gen;
+    gen.instantiate();
+    if (_coreSampleRate > 0.0) {
+        gen->set_mix_rate((float)_coreSampleRate);
+    }
+    // default buffer length
+    gen->set_buffer_length(0.5f);
+
+    _audio_generator = gen;
+    _audio_player->set_stream(_audio_generator);
+
+    _audio_player->play();
+    // obtain playback object (AudioStreamGeneratorPlayback)
+    godot::Ref<godot::AudioStreamPlayback> pb = _audio_player->get_stream_playback();
+    if (!pb.is_null()) {
+        _audio_playback = godot::Object::cast_to<godot::AudioStreamGeneratorPlayback>(pb.ptr());
+    } else {
+        _audio_playback = nullptr;
+    }
+}
+
+size_t Audio::sampleBatch(int16_t const* data, size_t frames) {
+    if (frames != 0) {
+        
+        _samples.resize((int)frames);
+
+        for (size_t i = 0; i < frames; ++i) {
+            float left = (float)data[i * 2] / 32768.0f;
+            float right = (float)data[i * 2 + 1] / 32768.0f;
+            godot::Vector2 v(left, right);
+            _samples[(int)i] = v;
+        }
+    }
+
     return frames;
 }
 
@@ -66,10 +110,6 @@ void Audio::sample(int16_t left, int16_t right) {
 
 void Audio::reset() {
     _logger = nullptr;
-
-    _deviceName.clear();
     _coreSampleRate = 0.0;
-    // _audioDev = 0;
-
     _samples.clear();
 }
