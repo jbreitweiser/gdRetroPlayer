@@ -11,12 +11,6 @@ bool Audio::init(Config* config, lrcpp::Logger* logger) {
 
     _logger->info("Audio subsystem initialized");
 
-    char const* driverName = nullptr;
-
-    if (config->getOption("sdl2lrcpp_audio_device", &driverName)) {
-        _deviceName = driverName;
-    }
-
     return true;
 }
 
@@ -36,14 +30,24 @@ void Audio::present() {
     // _logger->debug("Audio Not implemented");
 }
 
+const std::vector<int16_t>& Audio::getSamples() const {
+    return _samples;
+}
+
+void Audio::clearSamples() {
+    _samples.clear();
+}
+
 bool Audio::setSystemAvInfo(retro_system_av_info const* info) {
+     _logger->info("Audio:setSystemAvInfo  sample_rate=%f", info->timing.sample_rate);
+    _coreSampleRate = info->timing.sample_rate;
     return true;
 }
 
+
 bool Audio::setAudioCallback(retro_audio_callback const* callback) {
-    (void)callback;
     _logger->warn("RETRO_ENVIRONMENT_SET_AUDIO_CALLBACK not implemented");
-    return false;
+    return true;
 }
 
 size_t Audio::sampleBatch(int16_t const* data, size_t frames) {

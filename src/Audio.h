@@ -17,6 +17,10 @@ public:
 
     double getCoreSampleRate() const;
 
+    // Expose audio data to Godot
+    const std::vector<int16_t>& getSamples() const;
+    void clearSamples();
+
     void clear();
     void present();
 

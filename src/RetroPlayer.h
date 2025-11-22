@@ -16,6 +16,7 @@
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/classes/wrapped.hpp>
 #include <godot_cpp/variant/variant.hpp>
+#include <godot_cpp/classes/texture_rect.hpp>
 
 using namespace godot;
 
@@ -34,6 +35,12 @@ public:
     void forwarded_input( const Ref<InputEvent> &event );
     void input( const Dictionary &event );
     Ref<Image> get_frame_buffer();
+    PackedFloat32Array get_audio_samples();
+    void clear_audio_buffer();
+    double getCoreSampleRate();
+    void set_texture_rect(TextureRect *rect);
+
+
 
 protected:
     bool done = false;

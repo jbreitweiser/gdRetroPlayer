@@ -29,9 +29,40 @@ void Video::clear() {
     _logger->debug("Video::clear");
 }
 
-// Copy data from intermediary buffer to Image buffer
+// Copy data from intermediary buffer to Image buffer and update TextureRect
 void Video::present() {
-   _frame_buffer->set_data( _frame_buffer->get_width(), _frame_buffer->get_height(), false, _frame_buffer->get_format(), _intermediary_buffer );
+    if (_frame_buffer.is_null() || !_frame_buffer.is_valid()) {
+        return;
+    }
+
+    // Update internal Image with the latest pixel data
+    _frame_buffer->set_data(_frame_buffer->get_width(), _frame_buffer->get_height(), false, _frame_buffer->get_format(), _intermediary_buffer);
+
+    // Ensure we have an ImageTexture to update
+    if (_image_texture.is_null() || !_image_texture.is_valid()) {
+        _image_texture = godot::ImageTexture::create_from_image(_frame_buffer);
+        if (_image_texture.is_null() || !_image_texture.is_valid()) {
+            _logger->error("Video::present :: Failed to create ImageTexture");
+            return;
+        }
+
+        // Assign texture to TextureRect if available
+        if (_texture_rect != nullptr) {
+            _texture_rect->set_texture(_image_texture);
+        }
+    }
+    else {
+        // Update existing texture with new image data (more efficient)
+        _image_texture->update(_frame_buffer);
+    }
+}
+
+void Video::set_texture_rect(godot::TextureRect *rect) {
+    _texture_rect = rect;
+    // If we already have an image texture, assign it immediately
+    if (_image_texture.is_valid() && _texture_rect != nullptr) {
+        _texture_rect->set_texture(_image_texture);
+    }
 }
 
 bool Video::setRotation(unsigned rotation) {
@@ -117,6 +148,8 @@ bool Video::setGeometry(retro_game_geometry const* geometry) {
         _frame_buffer.unref();
         
         _textureWidth = _textureHeight = 0;
+        // Invalidate cached ImageTexture so it will be recreated for the new size
+        _image_texture.unref();
     }
 
     godot::Image::Format format = godot::Image::Format::FORMAT_RGB565;  
@@ -304,6 +337,7 @@ void Video::reset() {
     _logger = nullptr;
 
     _frame_buffer.unref();
+    _image_texture.unref();
 
     _pixelFormat = RETRO_PIXEL_FORMAT_UNKNOWN;
     _coreFps = 0.0;

@@ -2,6 +2,8 @@
 
 #include "Config.h"
 #include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/classes/texture_rect.hpp>
+#include <godot_cpp/classes/image_texture.hpp>
 
 #include <lrcpp/Components.h>
 
@@ -16,6 +18,7 @@ public:
 
     void clear();
     void present();
+    void set_texture_rect(godot::TextureRect *rect);
     godot::Ref<godot::Image> get_frame_buffer()
     {
         return _frame_buffer;
@@ -57,6 +60,8 @@ protected:
     double _coreFps;
     float _aspectRatio;
     godot::PackedByteArray _intermediary_buffer;
+    godot::TextureRect* _texture_rect;
+    godot::Ref<godot::ImageTexture> _image_texture;
     //SDL_Texture* _texture;
     unsigned _textureWidth;
     unsigned _textureHeight;

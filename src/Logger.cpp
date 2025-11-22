@@ -2,15 +2,17 @@
 
 void Logger::setLevel(retro_log_level level) {
     _priority = level;
+    godot::UtilityFunctions::print("[Logger] Log level set to ", level);
 }
 
 void Logger::vprintf(retro_log_level level, char const* format, va_list args) {
-    if (_priority >= level)
+    if (level >=_priority )
     {
         // Format the string with the va_list arguments
         char buffer[1024];
         vsnprintf(buffer, sizeof(buffer), format, args);
-        
+
+        // Log to Godot based on the log level
         switch (level) {
             case RETRO_LOG_DEBUG:
                 godot::UtilityFunctions::print(buffer);

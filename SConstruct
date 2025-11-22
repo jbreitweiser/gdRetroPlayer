@@ -68,7 +68,7 @@ library = env.SharedLibrary(
 # Ensure lrcpp builds first
 env.Depends(library, lrcpp_lib)
 
-copy = env.Install("{}/bin/{}/".format(projectdir, env["platform"]), library)
+copy = env.Install("{}/addons/libRetroPlayer/bin/{}/".format(projectdir, env["platform"]), library)
 
 default_args = [library, copy]
 Default(*default_args)
