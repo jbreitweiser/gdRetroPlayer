@@ -1,7 +1,7 @@
 #include "CpuId.hpp"
 
 #include <time.h>
-#include "../libcpuid/include/libcpuid.h"
+#include "../external/libcpuid/libcpuid.h"
 #include "DynLib.hpp"
 
 struct LibCpuId final {
