@@ -1,8 +1,9 @@
-#include "Perf.h"
+#include "Perf.hpp"
 
 #include <time.h>
 
-bool Perf::init() {
+bool Perf::init(Logger *logger) {
+   _logger = logger;
     return true;
 }
 
@@ -28,23 +29,23 @@ uint64_t Perf::getTimeNs() {
     return static_cast<int64_t>(ts.tv_sec * 1000000000 + ts.tv_nsec);
 }
 
+// RETRO_ENVIRONMENT_GET_PERF_INTERFACE
 retro_time_t Perf::getTimeUsec() {
     return static_cast<retro_time_t>(getTimeUs());
 }
 
+// RETRO_ENVIRONMENT_GET_PERF_INTERFACE
 uint64_t Perf::getCpuFeatures() {
-    // TODO detect other CPU features.
-    uint64_t features = 0;
+    godot::UtilityFunctions::print("Perf::getCpuFeatures :: Called");
+    if ( _cpuId.init(_logger)) {
+        return _cpuId.getFeatures();
+    }
+    else
+    {
+        _logger->error("Perf::getCpuFeatures :: Failed to init CpuId");
+    }
 
-    // features |= SDL_HasAVX() ? RETRO_SIMD_AVX : 0;
-    // features |= SDL_HasAVX2() ? RETRO_SIMD_AVX2 : 0;
-    // features |= SDL_HasMMX() ? RETRO_SIMD_MMX : 0;
-    // features |= SDL_HasSSE() ? RETRO_SIMD_SSE : 0;
-    // features |= SDL_HasSSE2() ? RETRO_SIMD_SSE2 : 0;
-    // features |= SDL_HasSSE3() ? RETRO_SIMD_SSE3 : 0;
-    // features |= SDL_HasSSE42() ? RETRO_SIMD_SSE42 : 0;
-
-    return features;
+    return 0;
 }
 
 retro_perf_tick_t Perf::getCounter() {

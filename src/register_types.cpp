@@ -6,7 +6,7 @@
 #include <godot_cpp/godot.hpp>
 
 #include "example_class.h"
-#include "RetroPlayer.h"
+#include "RetroPlayer.hpp"
 
 using namespace godot;
 

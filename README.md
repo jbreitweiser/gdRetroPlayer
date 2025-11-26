@@ -1,56 +1,47 @@
-# godot-cpp template
-This repository serves as a quickstart template for GDExtension development with Godot 4.0+.
+# RetroPlayer
+RetroPlayer is an implementation of the libRetro interface within godot using C++ as the shim.  The aim of this project is to make a libretro library that can easily be used inside of godot so the frontend can be developed in godot's flexible framework.  This is not a full frontend, just a player for godot.
 
-## Contents
-* Preconfigured source files for C++ development of the GDExtension ([src/](./src/))
-* An empty Godot project in [demo/](./demo), to test the GDExtension
-* godot-cpp as a submodule (`godot-cpp/`)
-* GitHub Issues template ([.github/ISSUE_TEMPLATE.yml](./.github/ISSUE_TEMPLATE.yml))
-* GitHub CI/CD workflows to publish your library packages when creating a release ([.github/workflows/builds.yml](./.github/workflows/builds.yml))
-* An SConstruct file with various functions, such as boilerplate for [Adding documentation](https://docs.godotengine.org/en/stable/tutorials/scripting/cpp/gdextension_docs_system.html)
+## Status
+* Have leveraged the lrcpp library to implement basic interfacing to a core.
+* video is currently being writen to am Image object that is part of a TextureRect2D
+* Audio is being played through an AudioStreamPlayer2D.
+* input is captured in GDScript and forwarded to the RetroPlayed via forward_input.  
+* It is playable but is slow and sound is out of sync
+* Have only tested against FBNeo and Mame 2003 + so far.
 
-## Usage - Template
 
-To use this template, log in to GitHub and click the green "Use this template" button at the top of the repository page. This will let you create a copy of this repository with a clean git history.
+## Usage
 
-To get started with your new GDExtension, do the following:
+Refer to the demo application in the demo folder for how it works with godot.  You simpley pass the textureRect and Audioplayer to the RetroPlayer before you start calling run.  Input has to be handled manually
 
-* clone your repository to your local computer
-* initialize the godot-cpp git submodule via `git submodule update --init`
-* change the name of the compiled library file inside the [SConstruct](./SConstruct) file by modifying the `libname` string.
-  * change the paths of the to be loaded library name inside the [demo/bin/example.gdextension](./demo/bin/example.gdextension) file, by replacing `EXTENSION-NAME` with the name you chose for `libname`.
-* change the `entry_symbol` string inside [demo/bin/example.gdextension](./demo/bin/example.gdextension) file.
-  * rename the `example_library_init` function in [src/register_types.cpp](./src/register_types.cpp) to the same name you chose for `entry_symbol`.
-* change the name of the `demo/bin/example.gdextension` file
 
-Now, you can build the project with the following command:
+## Build
 
-```shell
-scons
-```
+To build the source I am including what I did to build it on windows.  Your process may be different on a different platform.  My tools have beed MSYS2 + VSCode.
 
-If the build command worked, you can test it with the [demo](./demo) project. Import it into Godot, open it, and launch the main scene. You should see it print the following line in the console:
+* Install the Msys2 environment.  I had this installed to build retroarch previously.  Link -> https://docs.libretro.com/development/retroarch/compilation/windows/
+* I added the scons package to the msys2 environment.
+* download the github repo There are 2 submodules to this project included.
+  * godot-cpp - This is the C++ GDExtension required to use C++ with godot.  I usedtheir template to start.
+  * lrcpp - This library wrappers the libretro.h interface so it can be used with C++.  I stubs out all the functions.  I used their demo application and converted it to godot to be used as a player inside godot.  There are many features that are not yet implemented.
+* libcpuid - This is a google library used to detect CPU features.  It is implemented as an external dll only now but I should be able to add the linux and macos builds as well.  We only need the library file at the end so it can be built seperately.
+* To build the libcpuid library per their instructions.  https://github.com/anrieff/libcpuid?tab=readme-ov-file
+* To build retro player run scons from the main folder and godot-cpp, lrcpp, and retroplayer will build together.
 
-```
-Type: 24
-```
 
-### Configuring an IDE
-You can develop your own extension with any text editor and by invoking scons on the command line, but if you want to work with an IDE (Integrated Development Environment), you can use a compilation database file called `compile_commands.json`. Most IDEs should automatically identify this file, and self-configure appropriately.
-To generate the database file, you can run one of the following commands in the project root directory:
-```shell
-# Generate compile_commands.json while compiling
-scons compiledb=yes
+## Next Steps
 
-# Generate compile_commands.json without compiling
-scons compiledb=yes compile_commands.json
-```
+* Done
+  * Render Video to a TextureRect2D
+  * Render Audio to an AudioPlayer2D
+  * Capture Input from a joypad / controller
+  * integrate CPU Feature detection
 
-## Usage - Actions
-
-This repository comes with continuous integration (CI) through a GitHub action that tests building the GDExtension.
-It triggers automatically for each pushed change. You can find and edit it in [builds.yml](.github/workflows/ci.yml).
-
-There is also a workflow ([make_build.yml](.github/workflows/make_build.yml)) that builds the GDExtension for all supported platforms that you can use to create releases.
-You can trigger this workflow manually from the `Actions` tab on GitHub.
-After it is complete, you can find the file `godot-cpp-template.zip` in the `Artifacts` section of the workflow run.
+* Planned
+  * Implement Screen Rotation
+  * Tighter Audio and Video sync
+  * render audio and video to different nodes
+  * design a keyboard and mouse mapping to be able to get rid of the forward_event function.
+  * design a way to pass options to the RetroPlayer without the need of configuration files / load the files manually and pass them via func call
+  * Test more cores.
+  * Implement more libRetro interface features

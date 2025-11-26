@@ -1,4 +1,4 @@
-#include "Audio.h"
+#include "Audio.hpp"
 
 Audio::Audio() {
     reset();

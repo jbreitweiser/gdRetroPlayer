@@ -1,4 +1,4 @@
-#include "RetroPlayer.h"
+#include "RetroPlayer.hpp"
 
 #include <errno.h>
 #include <sys/stat.h>
@@ -84,7 +84,7 @@ bool RetroPlayer::init(std::vector<std::string> const& configPaths, char const* 
         }
     }
 
-    if (!_perf.init()) {
+    if (!_perf.init(&_logger)) {
         _logger.error("RetroPlayer::init :: Could not initialize the perf component");
         _config.destroy();
         return false;

@@ -1,0 +1,7 @@
+CompileFlags:
+  Remove:
+    - -fno-gnu-unique
+    - -gdwarf-4
+    - -g2
+  Add:
+    - -std=gnu++17

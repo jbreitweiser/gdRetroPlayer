@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "Logger.hpp"
 
 void Logger::setLevel(retro_log_level level) {
     _priority = level;

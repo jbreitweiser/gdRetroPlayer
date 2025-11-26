@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "Config.hpp"
 
 #include <string.h>
 #include <stdlib.h>
@@ -112,7 +112,7 @@ bool Config::getOption(char const* key, bool* value) const {
 
 bool Config::setPerformanceLevel(unsigned level) {
     (void)level;
-    _logger->warn("RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL not implemented");
+    _logger->warn("RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL not implemented.  Level at %u", level);
     return false;
 }
 

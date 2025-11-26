@@ -1,0 +1,3 @@
+C:\msys64\mingw64\bin\cmake.exe -E rm -f CMakeFiles\EXTENSION-NAME.dir/objects.a
+C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\EXTENSION-NAME.dir/objects.a @CMakeFiles\EXTENSION-NAME.dir\objects1.rsp
+C:\msys64\mingw64\bin\g++.exe -g -shared -Wl,--no-undefined -static -static-libgcc -static-libstdc++ -o C:\msys64\home\jbrei\gdRetroPlayer2\bin\windows\EXTENSION-NAME.windows.template_debug.x86_64.dll -Wl,--out-implib,libEXTENSION-NAME.windows.template_debug.x86_64.dll.a -Wl,--major-image-version,0,--minor-image-version,0 -Wl,--whole-archive CMakeFiles\EXTENSION-NAME.dir/objects.a -Wl,--no-whole-archive @CMakeFiles\EXTENSION-NAME.dir\linkLibs.rsp

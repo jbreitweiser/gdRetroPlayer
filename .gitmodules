@@ -5,3 +5,6 @@
 [submodule "lrcpp"]
 	path = lrcpp
 	url = https://github.com/jbreitweiser/lrcpp.git
+[submodule "libcpuid"]
+	path = libcpuid
+	url = https://github.com/anrieff/libcpuid.git
