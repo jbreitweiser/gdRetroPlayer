@@ -105,8 +105,8 @@ godot-cpp/clean: godot-cpp/CMakeFiles/godot-cpp.dir/clean
 # Target rules for target CMakeFiles/EXTENSION-NAME.dir
 
 # All Build rule for target.
-CMakeFiles/EXTENSION-NAME.dir/all: godot-cpp/CMakeFiles/godot-cpp.dir/all
 CMakeFiles/EXTENSION-NAME.dir/all: CMakeFiles/generate_doc_source.dir/all
+CMakeFiles/EXTENSION-NAME.dir/all: godot-cpp/CMakeFiles/godot-cpp.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\EXTENSION-NAME.dir\build.make CMakeFiles/EXTENSION-NAME.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\EXTENSION-NAME.dir\build.make CMakeFiles/EXTENSION-NAME.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\msys64\home\jbrei\gdRetroPlayer2\build\CMakeFiles --progress-num= "Built target EXTENSION-NAME"

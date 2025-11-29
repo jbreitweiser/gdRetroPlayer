@@ -40,7 +40,10 @@ void Video::present() {
 
     // Ensure we have an ImageTexture to update
     if (_image_texture.is_null() || !_image_texture.is_valid()) {
+
         _image_texture = godot::ImageTexture::create_from_image(_frame_buffer);
+
+
         if (_image_texture.is_null() || !_image_texture.is_valid()) {
             _logger->error("Video::present :: Failed to create ImageTexture");
             return;
@@ -65,10 +68,11 @@ void Video::set_texture_rect(godot::TextureRect *rect) {
     }
 }
 
+// RETRO_ENVIRONMENT_SET_ROTATION
 bool Video::setRotation(unsigned rotation) {
-    (void)rotation;
-    _logger->warn("RETRO_ENVIRONMENT_SET_ROTATION not implemented");
-    return false;
+    _logger->warn("[Video::setRotation] Set Rotation Called");
+    _rotation = rotation;
+    return true;
 }
 
 bool Video::getOverscan(bool* overscan) {
@@ -89,6 +93,7 @@ bool Video::showMessage(retro_message const* message) {
 }
 
 bool Video::setPixelFormat(retro_pixel_format format) {
+    _logger->warn("[Video::setGeometry] Set Pixel Format Called");
     _pixelFormat = format;
 
     switch (_pixelFormat) {
@@ -132,42 +137,112 @@ bool Video::setSystemAvInfo(retro_system_av_info const* info) {
 
 // RETRO_ENVIRONMENT_SET_GEOMETRY
 bool Video::setGeometry(retro_game_geometry const* geometry) {
-    _aspectRatio = geometry->aspect_ratio;
+    _logger->warn("[Video::setGeometry] Set Geometry Called");
+    unsigned int channels;
+    godot::Image::Format format = godot::Image::Format::FORMAT_RGB565;
 
+    _aspectRatio = geometry->aspect_ratio;
+    _usedWidth = _textureWidth = geometry->base_width;
+    _usedHeight = _textureHeight = geometry->base_height;
+
+    // If aspect ratio is not set, calculate it
     if (_aspectRatio <= 0) {
         _aspectRatio = (float)geometry->base_width / (float)geometry->base_height;
     }
 
-    _logger->info("[Video::setGeometry] Core aspect ratio set to %f", _aspectRatio);
+    // Adjust width and height for rotation
+    if(_rotation == 1 || _rotation == 3) {
+        std::swap(_textureWidth, _textureHeight);
+    }
 
+    // // If we already have a frame buffer, check if size matches
+    // if (_frame_buffer != nullptr) {
+    //     if (_textureWidth == _lastTextureWidth && _textureHeight == _lastTextureHeight) {
+    //         return true;
+    //     }
+
+    //     _frame_buffer.unref();
+    //     // Invalidate cached ImageTexture so it will be recreated for the new size
+    //     _image_texture.unref();
+    // }
+
+    // // Determine Godot pixel format based on retro pixel format 
+    // switch (_pixelFormat) {
+    //     case RETRO_PIXEL_FORMAT_0RGB1555: 
+    //         channels = 2;
+    //         format = godot::Image::Format::FORMAT_RGB565; 
+    //         break;
+    //     case RETRO_PIXEL_FORMAT_XRGB8888: 
+    //         channels = 4;
+    //         format = godot::Image::Format::FORMAT_RGBA8; 
+    //         break;
+    //     case RETRO_PIXEL_FORMAT_RGB565: 
+    //         channels = 2;
+    //         format = godot::Image::Format::FORMAT_RGB565;
+    //         break;
+    //     default:
+    //         _logger->error("[Video::setGeometry] Unknown pixel format, cannot create texture");
+    //         return false;
+    // }
+    
+    // _frame_buffer = godot::Image::create( _textureWidth, _textureHeight, false, format );
+    // _intermediary_buffer.resize( _textureWidth * _textureHeight * channels );
+
+    // if (_frame_buffer == nullptr) {
+    //     _logger->error("[Video::setGeometry] _frame_buffer failed: to create");
+    //     return false;
+    // }
+
+    // _textureFormat  = format;
+    // _lastTextureWidth = _frame_buffer->get_width();
+    // _lastTextureHeight = _frame_buffer->get_height();
+
+    // _logger->info("[Video::setGeometry] Texture created with %d x %d", _textureWidth, _textureHeight);
+    return setFrameBuffer();
+}
+
+// if there are changes in rotation, we may need to adjust the geometry
+bool Video::setFrameBuffer() {
+    unsigned int channels;
+    godot::Image::Format format = godot::Image::Format::FORMAT_RGB565;
+
+    // Adjust width and height for rotation
+    if(_rotation == 1 || _rotation == 3) {
+        std::swap(_textureWidth, _textureHeight);
+    }
+
+    // If we already have a frame buffer, check if size matches
     if (_frame_buffer != nullptr) {
-        if (geometry->max_width <= _textureWidth && geometry->max_height <= _textureHeight) {
+        if (_textureWidth == _lastTextureWidth && _textureHeight == _lastTextureHeight) {
             return true;
         }
 
+        // Invalidate framwbuffer and ImageTexture so it will be recreated for the new size
         _frame_buffer.unref();
-        
-        _textureWidth = _textureHeight = 0;
-        // Invalidate cached ImageTexture so it will be recreated for the new size
         _image_texture.unref();
     }
-
-    godot::Image::Format format = godot::Image::Format::FORMAT_RGB565;  
-
+    
+     // Determine Godot pixel format based on retro pixel format 
     switch (_pixelFormat) {
-        case RETRO_PIXEL_FORMAT_0RGB1555: format = godot::Image::Format::FORMAT_RGB565; break;
-        case RETRO_PIXEL_FORMAT_XRGB8888: format = godot::Image::Format::FORMAT_RGBA8; break;
-        case RETRO_PIXEL_FORMAT_RGB565: format = godot::Image::Format::FORMAT_RGB565; break;
-
+        case RETRO_PIXEL_FORMAT_0RGB1555: 
+            channels = 2;
+            format = godot::Image::Format::FORMAT_RGB565; 
+            break;
+        case RETRO_PIXEL_FORMAT_XRGB8888: 
+            channels = 4;
+            format = godot::Image::Format::FORMAT_RGBA8; 
+            break;
+        case RETRO_PIXEL_FORMAT_RGB565: 
+            channels = 2;
+            format = godot::Image::Format::FORMAT_RGB565;
+            break;
         default:
             _logger->error("[Video::setGeometry] Unknown pixel format, cannot create texture");
             return false;
     }
     
-    _frame_buffer = godot::Image::create( geometry->base_width, geometry->base_height, false,
-                                               format );
-    _intermediary_buffer.resize( geometry->base_width * geometry->base_height *
-                            ( format == godot::Image::Format::FORMAT_RGB565 ? 2 : 4 ) );
+    _frame_buffer = godot::Image::create( _textureWidth, _textureHeight, false, format );
+    _intermediary_buffer.resize( _textureWidth * _textureHeight * channels );
 
     if (_frame_buffer == nullptr) {
         _logger->error("[Video::setGeometry] _frame_buffer failed: to create");
@@ -175,78 +250,33 @@ bool Video::setGeometry(retro_game_geometry const* geometry) {
     }
 
     _textureFormat  = format;
-    _textureWidth = _frame_buffer->get_width();
-    _textureHeight = _frame_buffer->get_height();
+    _lastTextureWidth = _frame_buffer->get_width();
+    _lastTextureHeight = _frame_buffer->get_height();
 
-    _logger->info("[Video::setGeometry] Texture created with %d x %d", _textureWidth, _textureHeight);
     return true;
 }
 
 // RETRO_ENVIRONMENT_GET_CURRENT_SOFTWARE_FRAMEBUFFER
 bool Video::getCurrentSoftwareFramebuffer(retro_framebuffer* framebuffer) {
-    if ((framebuffer->access_flags & RETRO_MEMORY_ACCESS_READ) != 0) {
-        _logger->debug("[Video::getCurrentSoftwareFramebuffer] Software framebuffer doesn't support reading");
-        return false;
-    }
-
-    if (framebuffer->width != _textureWidth || framebuffer->height != _textureHeight) {
-        // SDL_DestroyTexture(_texture);
-        // _texture = nullptr;
-
-        retro_game_geometry geometry;
-        geometry.base_width = geometry.max_width = _usedWidth = framebuffer->width;
-        geometry.base_height = geometry.max_height = _usedHeight = framebuffer->height;
-        geometry.aspect_ratio = _aspectRatio; // maintain the aspect ration
-
-        if (!setGeometry(&geometry)) {
-            return false;
-        }
-    }
-
-    void* texturePixels = nullptr;
-    int texturePitch = 0;
-    unsigned buffer_size;
-    switch ( _frame_buffer->get_format() )
-    {
-        case godot::Image::FORMAT_RGB565:
-            buffer_size =  2;
-            break;
-        case godot::Image::FORMAT_RGBA8:
-            buffer_size = 4;
-            break;
-        default:
-            _logger->error( "[Video::getCurrentSoftwareFramebuffer] Unhandled pixel format: ",
-                                               _frame_buffer->get_format() );
-            return false;
-    }
-
-    buffer_size = framebuffer->width * framebuffer->height * buffer_size;
-
-    _intermediary_buffer.resize( buffer_size );
-    texturePixels = (void *)_intermediary_buffer.ptr();
-    //memcpy( (void *)_intermediary_buffer.ptr(), data, buffer_size );
-
-    framebuffer->data = texturePixels;
-    framebuffer->pitch = texturePitch;
-    framebuffer->format = RETRO_PIXEL_FORMAT_RGB565;
-    framebuffer->memory_flags = RETRO_MEMORY_ACCESS_WRITE | RETRO_MEMORY_TYPE_CACHED;
-
-    _logger->debug("[Video::getCurrentSoftwareFramebuffer] Returning software framebuffer %p", texturePixels);
-    return true;
+    _logger->warn("RETRO_ENVIRONMENT_GET_CURRENT_SOFTWARE_FRAMEBUFFER not implemented");
+    return false;
 }
 
+// RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE
 bool Video::getHwRenderInterface(retro_hw_render_interface const** interface) {
     (void)interface;
     _logger->warn("RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE not implemented");
     return false;
 }
 
+//  RETRO_ENVIRONMENT_SET_HW_RENDER_CONTEXT_NEGOTIATION_INTERFACE
 bool Video::setHwRenderContextNegotiationInterface(retro_hw_render_context_negotiation_interface const* interface) {
     (void)interface;
     _logger->warn("RETRO_ENVIRONMENT_SET_HW_RENDER_CONTEXT_NEGOTIATION_INTERFACE not implemented");
     return false;
 }
 
+// RETRO_ENVIRONMENT_SET_HW_SHARED_CONTEXT
 bool Video::setHwSharedContext() {
     _logger->warn("RETRO_ENVIRONMENT_SET_HW_SHARED_CONTEXT not implemented");
     return false;
@@ -254,8 +284,26 @@ bool Video::setHwSharedContext() {
 
 bool Video::getTargetRefreshRate(float* rate) {
     // TODO return the real monitor refresh rate?
-    *rate = 60.0f;
+    *rate = get_current_monitor_refresh_rate();
+    _logger->warn("Video::getTargetRefreshRate :: Monitor refresh rate is %f Hz", *rate);
     return true;
+}
+
+float Video::get_current_monitor_refresh_rate() {
+    godot::DisplayServer* server = godot::DisplayServer::get_singleton();
+    // Get the ID of the screen where the main window is currently located
+    int screen_id = server->window_get_current_screen();
+    
+    // Get the refresh rate for that specific screen
+    float refresh_rate = server->screen_get_refresh_rate(screen_id);
+
+    // If the refresh rate cannot be found (e.g., on Web platforms), it returns -1.0
+    if (refresh_rate < 0) {
+        // Handle error or use a default value
+        return 60.0f; // Default to 60 Hz
+    }
+    
+    return refresh_rate;
 }
 
 bool Video::getPreferredHwRender(unsigned* preferred) {
@@ -265,36 +313,40 @@ bool Video::getPreferredHwRender(unsigned* preferred) {
 
 // retro_video_refresh
 void Video::refresh(void const* data, unsigned width, unsigned height, size_t pitch) {
+    unsigned int channels;
+    unsigned buffer_size;
+
     if ( !data || _frame_buffer.is_null() || !_frame_buffer.is_valid() )
     {
         return;
     }
 
-    if ( (unsigned)_frame_buffer->get_width() != width ||
-         (unsigned)_frame_buffer->get_height() != height )
-    {
-        _logger->info( "Video::refresh :: Resizing frame buffer to %u x %u", width, height );
-        auto created_frame_buffer =
-            godot::Image::create( width, height, false, _frame_buffer->get_format() );
-        if ( created_frame_buffer.is_null() || !created_frame_buffer.is_valid() )
-        {
-            _logger->error( "Video::refresh :: Failed to recreate frame buffer" );
-            return;
-        }
-        _frame_buffer = created_frame_buffer;
-    }
+    _textureWidth = width;
+    _textureHeight = height;
+    setFrameBuffer();
 
-    unsigned buffer_size;
+    // if ( _usedWidth != width || _usedHeight != height ) {
+    //     _logger->info( "Video::refresh :: Resizing frame buffer to %u x %u", width, height );
+
+    //     auto created_frame_buffer =
+    //         godot::Image::create( width, height, false, _frame_buffer->get_format() );
+    //     if ( created_frame_buffer.is_null() || !created_frame_buffer.is_valid() )
+    //     {
+    //         _logger->error( "Video::refresh :: Failed to recreate frame buffer" );
+    //         return;
+    //     }
+    //     _frame_buffer = created_frame_buffer;
+    // }
+
     switch ( _frame_buffer->get_format() )
     {
         case godot::Image::FORMAT_RGB565:
-            buffer_size = width * height * 2;
+            channels = 2;
             break;
-        
         case godot::Image::FORMAT_RGBA8:
         {
-            buffer_size = width * height * 4;
-
+            channels = 4;
+            
             // Retroarch uses XRGB8888, X is the A, so it looks like ARGB8888, but Godot only
             // supports RGBA8888 We need to swap the first and last bytes, so alpha is the last byte
             // to get accurate color
@@ -316,11 +368,42 @@ void Video::refresh(void const* data, unsigned width, unsigned height, size_t pi
                                                _frame_buffer->get_format() );
             return;
     }
-    frame_count++;
 
+    frame_count++;
+    buffer_size = width * height * channels;
     _intermediary_buffer.resize( buffer_size );
-    memcpy( (void *)_intermediary_buffer.ptr(), data, buffer_size );
+
+    if(_rotation == 1 || _rotation == 3) {
+        copyImage90DegClockwise((unsigned char*)data, (unsigned char*)_intermediary_buffer.ptr(), width, height, channels);
+    }
+    else {
+        memcpy( (void *)_intermediary_buffer.ptr(), data, buffer_size );
+    }
 }
+
+void Video::copyImage90DegClockwise(const unsigned char* source_buffer, unsigned char* dest_buffer, unsigned int width, unsigned int height, unsigned int channels) {
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
+            // Calculate the linear index for the source pixel
+            unsigned int source_index = (y * width + x) * channels;
+
+            // Calculate the coordinates for the destination pixel after 90-degree clockwise rotation:
+            // new_x = height - 1 - y
+            // new_y = x
+            unsigned int dest_x = height - 1 - y;
+            unsigned int dest_y = x;
+
+            // Calculate the linear index for the destination pixel
+            unsigned int dest_index = (dest_y * height + dest_x) * channels;
+
+            // Copy the pixel data (all channels)
+            for (unsigned int c = 0; c < channels; ++c) {
+                dest_buffer[dest_index + c] = source_buffer[source_index + c];
+            }
+        }
+    }
+}
+
 
 uintptr_t Video::getCurrentFramebuffer() {
      _logger->info("Video::getCurrentFramebuffer");

@@ -13,6 +13,8 @@ var core_name: String = "mame2003_plus_libretro.dll"
 var core_path: String = "C:\\roms\\cores\\"
 
 var content_name: String = "arcade\\ddragon.zip"
+#ddragon.zip
+#defender.zip
 #digdug.zip"
 var content_path: String = "C:\\roms\\"
 # Called when the node enters the scene tree for the first time.

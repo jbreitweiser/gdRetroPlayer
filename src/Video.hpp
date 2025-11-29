@@ -4,6 +4,9 @@
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/texture_rect.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
+#include <godot_cpp/classes/display_server.hpp>
+#include <godot_cpp/variant/vector2i.hpp>
+#include <godot_cpp/core/class_db.hpp>
 
 #include <lrcpp/Components.h>
 
@@ -47,25 +50,31 @@ public:
     virtual retro_proc_address_t getProcAddress(char const* symbol) override;
 
 protected:
+    void  copyImage90DegClockwise(const unsigned char* source_buffer, unsigned char* dest_buffer, unsigned int width, unsigned int height, unsigned int channels);
+    bool setFrameBuffer();
     void reset();
+    float get_current_monitor_refresh_rate();
     int frame_count = 0;
     lrcpp::Logger* _logger;
 
     godot::Ref<godot::Image> _frame_buffer;
-
-    //SDL_Window* _window;
-    //SDL_Renderer* _renderer;
+    unsigned _rotation = 0;  // requested rotation
+    unsigned _lastRotation = _rotation; // last applied rotation
+    float _aspectRatio;  // aspect ratio
+    unsigned _textureWidth;  // requested width
+    unsigned _textureHeight;  // requested height
+    unsigned _lastTextureWidth;  // last width
+    unsigned _lastTextureHeight;  // last height
+    unsigned _usedWidth;
+    unsigned _usedHeight;
 
     retro_pixel_format _pixelFormat;
     double _coreFps;
-    float _aspectRatio;
+    
     godot::PackedByteArray _intermediary_buffer;
     godot::TextureRect* _texture_rect;
     godot::Ref<godot::ImageTexture> _image_texture;
-    //SDL_Texture* _texture;
-    unsigned _textureWidth;
-    unsigned _textureHeight;
+    
     godot::Image::Format _textureFormat;
-    unsigned _usedWidth;
-    unsigned _usedHeight;
+    
 };

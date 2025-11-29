@@ -36,7 +36,7 @@ Run the following command to download godot-cpp:
     sys.exit(1)
 
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
-
+env.Tool('compilation_db')
 # Build lrcpp as a static library
 env.Append(CPPPATH=["src/", "lrcpp/include/"])
 lrcpp_sources = Glob("lrcpp/src/*.cpp")
@@ -72,3 +72,5 @@ copy = env.Install("{}/addons/libRetroPlayer/bin/{}/".format(projectdir, env["pl
 
 default_args = [library, copy]
 Default(*default_args)
+
+env.CompilationDatabase(target='build/compile_commands.json')

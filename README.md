@@ -32,13 +32,14 @@ To build the source I am including what I did to build it on windows.  Your proc
 ## Next Steps
 
 * Done
+  * Implement Screen Rotation
   * Render Video to a TextureRect2D
   * Render Audio to an AudioPlayer2D
   * Capture Input from a joypad / controller
   * integrate CPU Feature detection
 
 * Planned
-  * Implement Screen Rotation
+  * Implement interface for different nodes to display the video.
   * Tighter Audio and Video sync
   * render audio and video to different nodes
   * design a keyboard and mouse mapping to be able to get rid of the forward_event function.

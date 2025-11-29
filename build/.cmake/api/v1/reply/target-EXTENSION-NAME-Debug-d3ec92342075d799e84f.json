@@ -189,12 +189,12 @@
 	"dependencies" : 
 	[
 		{
-			"backtrace" : 2,
-			"id" : "godot-cpp::@4487305cb972aeb5fb22"
-		},
-		{
 			"backtrace" : 4,
 			"id" : "generate_doc_source::@6890427a1f51a3e7e1df"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "godot-cpp::@4487305cb972aeb5fb22"
 		}
 	],
 	"id" : "EXTENSION-NAME::@6890427a1f51a3e7e1df",
