@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Config.hpp"
+
+#include <vector>
+#include <cstdint>
+
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/texture_rect.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
@@ -9,6 +13,15 @@
 #include <godot_cpp/core/class_db.hpp>
 
 #include <lrcpp/Components.h>
+
+enum VideoRotation {
+        ROTATE_0,
+        ROTATE_90,
+        ROTATE_180,
+        ROTATE_270,
+        ROTATE_MAX
+    };
+
 
 class Video : public lrcpp::Video {
 public:
@@ -50,7 +63,7 @@ public:
     virtual retro_proc_address_t getProcAddress(char const* symbol) override;
 
 protected:
-    void  copyImage90DegClockwise(const unsigned char* source_buffer, unsigned char* dest_buffer, unsigned int width, unsigned int height, unsigned int channels);
+    void rotateImage(const unsigned char* source_buffer, unsigned char* dest_buffer, unsigned int width, unsigned int height, unsigned int channels, unsigned int rotation);
     bool setFrameBuffer();
     void reset();
     float get_current_monitor_refresh_rate();

@@ -12,7 +12,7 @@ var core_name: String = "mame2003_plus_libretro.dll"
 ## fbneo_libretro.dll
 var core_path: String = "C:\\roms\\cores\\"
 
-var content_name: String = "arcade\\ddragon.zip"
+var content_name: String = "arcade\\digdug.zip"
 #ddragon.zip
 #defender.zip
 #digdug.zip"

@@ -373,37 +373,59 @@ void Video::refresh(void const* data, unsigned width, unsigned height, size_t pi
     buffer_size = width * height * channels;
     _intermediary_buffer.resize( buffer_size );
 
-    if(_rotation == 1 || _rotation == 3) {
-        copyImage90DegClockwise((unsigned char*)data, (unsigned char*)_intermediary_buffer.ptr(), width, height, channels);
+    if(_rotation > 0) {
+        rotateImage((unsigned char*)data, (unsigned char*)_intermediary_buffer.ptr(), width, height, channels, 4 - _rotation);
     }
     else {
         memcpy( (void *)_intermediary_buffer.ptr(), data, buffer_size );
     }
 }
 
-void Video::copyImage90DegClockwise(const unsigned char* source_buffer, unsigned char* dest_buffer, unsigned int width, unsigned int height, unsigned int channels) {
-    for (unsigned int y = 0; y < height; ++y) {
-        for (unsigned int x = 0; x < width; ++x) {
-            // Calculate the linear index for the source pixel
-            unsigned int source_index = (y * width + x) * channels;
+// Rotate raw image data (RGBA or any channel count)
+void Video::rotateImage(
+    const unsigned char* source_buffer, 
+    unsigned char* dest_buffer,
+    unsigned int width,
+    unsigned int height,
+    unsigned int channels,
+    unsigned int rotation
+) {
+    int newWidth = (rotation == ROTATE_90 || rotation == ROTATE_270) ? height : width;
+    int newHeight = (rotation == ROTATE_90 || rotation == ROTATE_270) ? width : height;
 
-            // Calculate the coordinates for the destination pixel after 90-degree clockwise rotation:
-            // new_x = height - 1 - y
-            // new_y = x
-            unsigned int dest_x = height - 1 - y;
-            unsigned int dest_y = x;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            // Source pixel index
+            int srcIndex = (y * width + x) * channels;
 
-            // Calculate the linear index for the destination pixel
-            unsigned int dest_index = (dest_y * height + dest_x) * channels;
+            int dstX, dstY;
+            switch (rotation) {
+                case ROTATE_90: // 90 degrees
+                    dstX = height - 1 - y;
+                    dstY = x;
+                    break;
+                case ROTATE_180: // 180 degrees
+                    dstX = width - 1 - x;
+                    dstY = height - 1 - y;
+                    break;
+                case ROTATE_270: // 270 degrees
+                    dstX = y;
+                    dstY = width - 1 - x;
+                    break;
+            }
 
-            // Copy the pixel data (all channels)
-            for (unsigned int c = 0; c < channels; ++c) {
-                dest_buffer[dest_index + c] = source_buffer[source_index + c];
+            // Destination pixel index
+            int dstIndex = (dstY * newWidth + dstX) * channels;
+
+            // Copy pixel (all channels)
+            for (int c = 0; c < channels; ++c) {
+                dest_buffer[dstIndex + c] = source_buffer[srcIndex + c];
             }
         }
     }
-}
 
+    return;
+}
 
 uintptr_t Video::getCurrentFramebuffer() {
      _logger->info("Video::getCurrentFramebuffer");
