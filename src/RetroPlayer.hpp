@@ -26,7 +26,7 @@ class RetroPlayer : public RefCounted {
 
 public:
     RetroPlayer();
-	~RetroPlayer() override = default;
+	~RetroPlayer() override;
 
     bool init(std::vector<std::string> const& configPaths, char const* corePath, char const* contentPath, int verboseness);
     // Godot-facing wrapper that accepts Godot types and converts them to STL types

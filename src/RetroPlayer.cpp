@@ -56,6 +56,12 @@ RetroPlayer::RetroPlayer()
     _logger.info( "[RetroPlayer] Constructor" );
 }
 
+RetroPlayer::~RetroPlayer()
+{
+    destroy();
+    _logger.info( "[RetroPlayer] Destructor" );
+}
+
 bool RetroPlayer::init(std::vector<std::string> const& configPaths, char const* corePath, char const* contentPath, int verboseness) {
 
     _logger.setLevel(RETRO_LOG_WARN);

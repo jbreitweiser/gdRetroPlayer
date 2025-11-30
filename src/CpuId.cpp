@@ -26,7 +26,9 @@ private:
 
 CpuId::CpuId() : pimpl(std::make_unique<CpuIdImpl>()) {}
 
-CpuId::~CpuId() = default;
+CpuId::~CpuId() {
+    destroy();
+};
 
 bool CpuId::init(Logger *logger) {
     return pimpl->init(logger);

@@ -15,6 +15,11 @@ run/main_scene="uid://didpfqa11i68r"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
+[display]
+
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
 [input]
 
 quit_game={

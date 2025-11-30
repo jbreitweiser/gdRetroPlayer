@@ -1,7 +1,7 @@
-extends Node2D
+extends MarginContainer
 
-@onready var texture_rect: TextureRect = $BoxContainer/TextureRect
-@onready var audio_stream_player_2d: AudioStreamPlayer2D = $BoxContainer/TextureRect/AudioStreamPlayer2D
+@onready var texture_rect: TextureRect = $TextureRect
+@onready var audio_stream_player_2d: AudioStreamPlayer2D = $AudioStreamPlayer2D
 
 var retro_player: RetroPlayer = RetroPlayer.new()
 
@@ -12,7 +12,7 @@ var core_name: String = "mame2003_plus_libretro.dll"
 ## fbneo_libretro.dll
 var core_path: String = "C:\\roms\\cores\\"
 
-var content_name: String = "arcade\\digdug.zip"
+var content_name: String = "arcade\\defender.zip"
 #ddragon.zip
 #defender.zip
 #digdug.zip"
@@ -29,9 +29,9 @@ func _ready() -> void:
 			initialize_controllers(id, true)
 	
 	## Initialize the core and selected content
-	retro_player.player_init([], core_path + core_name, content_path + content_name, 2)
-	retro_player.set_texture_rect(texture_rect);
+	retro_player.set_texture_rect(texture_rect)
 	retro_player.set_audio_player(audio_stream_player_2d)
+	retro_player.player_init([], core_path + core_name, content_path + content_name, 2)
 
 func initialize_controllers(id: int, connected: bool) -> void:
 	if connected:

@@ -10,8 +10,8 @@ class CpuIdImpl;
 
 class CpuId {
 public:
-CpuId();
-~CpuId();
+    CpuId();
+    ~CpuId();
     bool init(Logger* logger);
     void destroy();
 

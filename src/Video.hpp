@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config.hpp"
+#include "TextureRectRenderer.hpp"
 
 #include <vector>
 #include <cstdint>
@@ -26,7 +27,7 @@ enum VideoRotation {
 class Video : public lrcpp::Video {
 public:
     Video();
-
+    ~Video();
     bool init(Config* config, lrcpp::Logger* logger);
     void destroy();
 
@@ -35,10 +36,6 @@ public:
     void clear();
     void present();
     void set_texture_rect(godot::TextureRect *rect);
-    godot::Ref<godot::Image> get_frame_buffer()
-    {
-        return _frame_buffer;
-    }
 
     // lrcpp::Video
     virtual bool setRotation(unsigned rotation) override;
@@ -64,13 +61,10 @@ public:
 
 protected:
     void rotateImage(const unsigned char* source_buffer, unsigned char* dest_buffer, unsigned int width, unsigned int height, unsigned int channels, unsigned int rotation);
-    bool setFrameBuffer();
     void reset();
-    float get_current_monitor_refresh_rate();
     int frame_count = 0;
     lrcpp::Logger* _logger;
 
-    godot::Ref<godot::Image> _frame_buffer;
     unsigned _rotation = 0;  // requested rotation
     unsigned _lastRotation = _rotation; // last applied rotation
     float _aspectRatio;  // aspect ratio
@@ -78,16 +72,10 @@ protected:
     unsigned _textureHeight;  // requested height
     unsigned _lastTextureWidth;  // last width
     unsigned _lastTextureHeight;  // last height
-    unsigned _usedWidth;
-    unsigned _usedHeight;
 
     retro_pixel_format _pixelFormat;
     double _coreFps;
     
     godot::PackedByteArray _intermediary_buffer;
-    godot::TextureRect* _texture_rect;
-    godot::Ref<godot::ImageTexture> _image_texture;
-    
-    godot::Image::Format _textureFormat;
-    
+    RenderSurface* _renderer = nullptr;
 };
