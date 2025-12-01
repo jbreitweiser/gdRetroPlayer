@@ -65,7 +65,7 @@ RetroPlayer::~RetroPlayer()
 bool RetroPlayer::init(std::vector<std::string> const& configPaths, char const* corePath, char const* contentPath, int verboseness) {
 
     _logger.setLevel(RETRO_LOG_WARN);
-
+    
     if (!_config.init(configPaths, contentPath, corePath, &_logger)) {
         _logger.error("RetroPlayer::init :: Could not initialize the configuration component");
         return false;
@@ -190,6 +190,7 @@ error:
         goto error;
     }
 
+    _initialized = true;
     return true;
 }
 
@@ -203,9 +204,7 @@ bool RetroPlayer::player_init(const godot::PackedStringArray &configPaths, const
     }
 
     std::string core = corePath.utf8().get_data();
-    std::string content = contentPath.utf8().get_data();
-    _logger.info("RetroPlayer::player_init :: core=%s", core.c_str());
-    _logger.info("RetroPlayer::player_init :: content=%s", content.c_str());  
+    std::string content = contentPath.utf8().get_data(); 
 
     return init(paths, core.c_str(), content.c_str(), verboseness);
 }
@@ -215,8 +214,6 @@ void RetroPlayer::destroy() {
     _frontend.unset();
 
     _input.destroy();
-    // Clear any TextureRect reference before destroying video
-    _video.set_texture_rect(nullptr);
     _video.destroy();
     _audio.destroy();
     _config.destroy();
@@ -226,12 +223,15 @@ void RetroPlayer::destroy() {
 }
 
 void RetroPlayer::run() {
-    _audio.clear();
-    _video.clear();
-    _frontend.run();
-    _audio.present();
-    _video.present();  // Copy framebuffer data to the texture and render it
-
+    if( _initialized) {
+        _audio.clear();
+        _video.clear();
+        _frontend.run();
+        _audio.present();
+        _video.present();  // Copy framebuffer data to the texture and render it
+    } else {
+        _logger.error("RetroPlayer::run :: Player not initialized correctly.");
+    }
 }
 
 void RetroPlayer::forwarded_input( const godot::Ref<godot::InputEvent> &event )

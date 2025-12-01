@@ -17,6 +17,10 @@ var content_name: String = "arcade\\defender.zip"
 #defender.zip
 #digdug.zip"
 var content_path: String = "C:\\roms\\"
+var config_path = ProjectSettings.globalize_path("res://assett/mame2003plus.cfg").replace("/", "\\")
+
+var initialized: bool = false
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	## Connect the joypad attached/detatched signal
@@ -31,7 +35,8 @@ func _ready() -> void:
 	## Initialize the core and selected content
 	retro_player.set_texture_rect(texture_rect)
 	retro_player.set_audio_player(audio_stream_player_2d)
-	retro_player.player_init([], core_path + core_name, content_path + content_name, 2)
+	print(config_path)
+	retro_player.player_init([config_path], core_path + core_name, content_path + content_name, 2) 
 
 func initialize_controllers(id: int, connected: bool) -> void:
 	if connected:

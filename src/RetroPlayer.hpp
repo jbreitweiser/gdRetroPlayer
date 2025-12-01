@@ -42,6 +42,7 @@ public:
 
 
 protected:
+    bool _initialized = false;
     bool done = false;
     void const* readAll(char const* path, size_t* size);
     bool loadCore(char const *path);

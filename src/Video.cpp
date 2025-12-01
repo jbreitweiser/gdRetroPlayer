@@ -22,7 +22,6 @@ bool Video::init(Config* config, lrcpp::Logger* logger) {
 }
 
 void Video::destroy() {
-    godot::UtilityFunctions::print("Video::destroy");
     reset();
 }
 
