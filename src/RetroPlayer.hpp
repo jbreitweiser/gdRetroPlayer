@@ -37,7 +37,8 @@ public:
     void input( const Dictionary &event );
     double getCoreSampleRate();
     void set_texture_rect(TextureRect *rect);
-    void set_audio_player(godot::AudioStreamPlayer2D *player);
+    void set_render_surface(godot::Node *node);
+    void set_audio_player(Node *player);
 
 
 

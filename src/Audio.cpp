@@ -28,19 +28,11 @@ void Audio::clear() {
 
 void Audio::present() {
     // Push queued samples to audio playback if available
-    if (_audio_playback == nullptr) {
+    if (_audio_player == nullptr) {
         return;
     }
 
-    size_t frames =  _samples.size();
-
-    if (frames == 0) {
-        return;
-    }
-
-    _audio_playback->push_buffer(_samples);
-
-    _samples.clear();
+    _audio_player->present(&_samples);
 
 }
 
@@ -56,35 +48,14 @@ bool Audio::setAudioCallback(retro_audio_callback const* callback) {
     return true;
 }
 
-void Audio::set_audio_player(godot::AudioStreamPlayer2D *player) {
-    _audio_player = player;
+void Audio::set_audio_player(godot::Node* player) {
+    AudioPlayerFactory factory(_logger);
+    _audio_player = factory.createAudioPlayer(player, _coreSampleRate);
 
     if (_audio_player == nullptr) {
-        _audio_generator.unref();
-        _audio_playback = nullptr;
-        return;
+        _logger->error("Audio Player is null, audio output disabled.");
     }
-
-    // instantiate an AudioStreamGenerator and set it as the player's stream
-    godot::Ref<godot::AudioStreamGenerator> gen;
-    gen.instantiate();
-    if (_coreSampleRate > 0.0) {
-        gen->set_mix_rate((float)_coreSampleRate);
-    }
-    // default buffer length
-    gen->set_buffer_length(0.5f);
-
-    _audio_generator = gen;
-    _audio_player->set_stream(_audio_generator);
-
-    _audio_player->play();
-    // obtain playback object (AudioStreamGeneratorPlayback)
-    godot::Ref<godot::AudioStreamPlayback> pb = _audio_player->get_stream_playback();
-    if (!pb.is_null()) {
-        _audio_playback = godot::Object::cast_to<godot::AudioStreamGeneratorPlayback>(pb.ptr());
-    } else {
-        _audio_playback = nullptr;
-    }
+ 
 }
 
 size_t Audio::sampleBatch(int16_t const* data, size_t frames) {

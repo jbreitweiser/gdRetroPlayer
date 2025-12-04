@@ -1,6 +1,6 @@
 [configuration]
 
-entry_symbol = "example_library_init"
+entry_symbol = "retro_player_library_init"
 compatibility_minimum = "4.1"
 
 [libraries]
@@ -20,10 +20,10 @@ windows.x86_32.double.debug = "./windows/EXTENSION-NAME.windows.template_debug.x
 windows.x86_32.single.release = "./windows/EXTENSION-NAME.windows.template_release.x86_32.dll"
 windows.x86_32.double.release = "./windows/EXTENSION-NAME.windows.template_release.x86_32.double.dll"
 
-windows.x86_64.single.debug = "./windows/RetroPlayer.windows.template_debug.x86_64.dll"
-windows.x86_64.double.debug = "./windows/RetroPlayer.windows.template_debug.x86_64.double.dll"
-windows.x86_64.single.release = "./windows/RetroPlayer.windows.template_release.x86_64.dll"
-windows.x86_64.double.release = "./windows/RetroPlayer.windows.template_release.x86_64.double.dll"
+windows.x86_64.single.debug = "windows/RetroPlayer.windows.template_debug.x86_64.dll"
+windows.x86_64.double.debug = "windows/RetroPlayer.windows.template_debug.x86_64.double.dll"
+windows.x86_64.single.release = "windows/RetroPlayer.windows.template_release.x86_64.dll"
+windows.x86_64.double.release = "windows/RetroPlayer.windows.template_release.x86_64.double.dll"
 
 linux.x86_64.single.debug = "./linux/libEXTENSION-NAME.linux.template_debug.x86_64.so"
 linux.x86_64.double.debug = "./linux/libEXTENSION-NAME.linux.template_debug.x86_64.double.so"

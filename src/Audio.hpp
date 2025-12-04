@@ -7,11 +7,10 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
-#include <godot_cpp/classes/audio_stream_player2d.hpp>
-#include <godot_cpp/classes/audio_stream_generator.hpp>
-#include <godot_cpp/classes/audio_stream_generator_playback.hpp>
 #include <godot_cpp/variant/packed_vector2_array.hpp>
 #include <godot_cpp/variant/vector2.hpp>
+#include "audio_players/AudioPlayer.hpp"
+#include "audio_players/AudioPlayerFactory.hpp"
 
 class Audio : public lrcpp::Audio {
 public:
@@ -24,7 +23,7 @@ public:
 
     void clear();
     void present();
-    void set_audio_player(godot::AudioStreamPlayer2D *player);
+    void set_audio_player(godot::Node* player);
 
     // lrcpp::Audio
     virtual bool setSystemAvInfo(retro_system_av_info const* info) override;
@@ -40,7 +39,5 @@ protected:
     godot::PackedVector2Array _samples;
 
     // Godot audio output
-    godot::AudioStreamPlayer2D* _audio_player;
-    godot::Ref<godot::AudioStreamGenerator> _audio_generator;
-    godot::AudioStreamGeneratorPlayback* _audio_playback;
+    AudioPlayer*  _audio_player;
 };

@@ -236,12 +236,14 @@ void RetroPlayer::run() {
 
 void RetroPlayer::forwarded_input( const godot::Ref<godot::InputEvent> &event )
 {
-    _input.process( event.ptr() );
+    if(_initialized)
+        _input.process( event.ptr() );
 }
 
 void RetroPlayer::input( const Dictionary &event )
 {
-    _input.process( event );
+    if(_initialized)
+        _input.process( event );
 }
 
 void const* RetroPlayer::readAll(char const* path, size_t* size) {
@@ -287,7 +289,11 @@ void RetroPlayer::set_texture_rect(godot::TextureRect *rect) {
     _video.set_texture_rect(rect);
 }
 
-void RetroPlayer::set_audio_player(godot::AudioStreamPlayer2D *player) {
+void RetroPlayer::set_render_surface(godot::Node *node) {
+    _video.set_render_surface(node);
+}
+
+void RetroPlayer::set_audio_player(godot::Node *player) {
     _audio.set_audio_player(player);
 }
 
@@ -299,8 +305,9 @@ void RetroPlayer::_bind_methods()
 {   
     godot::ClassDB::bind_method( godot::D_METHOD( "player_init", "configPaths", "corePath", "contentPath", "verboseness" ), &RetroPlayer::player_init );
     godot::ClassDB::bind_method( godot::D_METHOD( "run" ), &RetroPlayer::run );
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_render_surface", "node" ), &RetroPlayer::set_render_surface );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_texture_rect", "texture_rect" ), &RetroPlayer::set_texture_rect );
-    godot::ClassDB::bind_method( godot::D_METHOD( "set_audio_player", "audio_player" ), &RetroPlayer::set_audio_player );
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_audio_player", "player" ), &RetroPlayer::set_audio_player );
     godot::ClassDB::bind_method( godot::D_METHOD( "forward_input", "event" ), &RetroPlayer::forwarded_input );
     godot::ClassDB::bind_method( godot::D_METHOD( "input", "event" ), &RetroPlayer::input );
     godot::ClassDB::bind_method( godot::D_METHOD( "quit" ), &RetroPlayer::destroy );

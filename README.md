@@ -3,16 +3,16 @@ RetroPlayer is an implementation of the libRetro interface within godot using C+
 
 ## Status
 * Have leveraged the lrcpp library to implement basic interfacing to a core.
-* video is currently being writen to am Image object that is part of a TextureRect2D
-* Audio is being played through an AudioStreamPlayer2D.
+* video is currently being writen to an Image object.
+* Audio is being played through an AudioStreamPlayer.
 * input is captured in GDScript and forwarded to the RetroPlayed via forward_input.  
-* It is playable but is slow and sound is out of sync
-* Have only tested against FBNeo and Mame 2003 + so far.
+* It is playable but is slow and sound is out of sync (better now)
+* Have only tested against FBNeo and Mame 2003+ so far.
 
 
 ## Usage
 
-Refer to the demo application in the demo folder for how it works with godot.  You simpley pass the textureRect and Audioplayer to the RetroPlayer before you start calling run.  Input has to be handled manually
+Refer to the demo application in the demo folder for how it works with godot.  You simpley pass the render surface (TextureRect or MashInstance) and Audioplayer (AudioStreamPlayer 2D or 3D) to the RetroPlayer before you start calling run.  Input has to be handled manually
 
 
 ## Build
@@ -37,11 +37,11 @@ To build the source I am including what I did to build it on windows.  Your proc
   * Render Audio to an AudioPlayer2D
   * Capture Input from a joypad / controller
   * integrate CPU Feature detection
+  * Implement interface for different nodes to display the video. (TextureRect2D and MeshInstance3D)
+  * Implement interface for different nodes to display the audio. (AudioStreamPlayer2D and 3D)
+  * Tighter Audio and Video sync by rendering to nodes in the C++ code instead of returning data to GDScript.
 
 * Planned
-  * Implement interface for different nodes to display the video.
-  * Tighter Audio and Video sync
-  * render audio and video to different nodes
   * design a keyboard and mouse mapping to be able to get rid of the forward_event function.
   * design a way to pass options to the RetroPlayer without the need of configuration files / load the files manually and pass them via func call
   * Test more cores.

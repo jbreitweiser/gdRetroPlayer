@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Config.hpp"
-#include "TextureRectRenderer.hpp"
+#include "render_surfaces/RenderSurfaceFactory.hpp"
 
 #include <vector>
 #include <cstdint>
@@ -36,6 +36,7 @@ public:
     void clear();
     void present();
     void set_texture_rect(godot::TextureRect *rect);
+    void set_render_surface(godot::Node *node);
 
     // lrcpp::Video
     virtual bool setRotation(unsigned rotation) override;

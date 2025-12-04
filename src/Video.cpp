@@ -39,12 +39,20 @@ void Video::present() {
     _renderer->present(&_intermediary_buffer);
 }
 
+
+void Video::set_render_surface(godot::Node *node) {
+    RenderSurfaceFactory* factory = new RenderSurfaceFactory(_logger);
+    _renderer = factory->createRenderer(node);
+}
+
+
 //  Rename to set render surface and use class name to determine which render class to apply
 void Video::set_texture_rect(godot::TextureRect *rect) {
-    TextureRectRenderer* renderer = new TextureRectRenderer();
-    renderer->setTextureRect(rect);
-    renderer->init(_logger);
-    _renderer = (RenderSurface*)renderer;
+    set_render_surface((godot::Node*) rect); 
+    // TextureRectRenderer* renderer = new TextureRectRenderer();
+    // renderer->setTextureRect(rect);
+    // renderer->init(_logger);
+    // _renderer = (RenderSurface*)renderer;
 
 }
 

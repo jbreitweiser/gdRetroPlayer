@@ -10,6 +10,15 @@ projectdir = "demo"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
 
+def AllSources(node='.', pattern='*'):
+    result = [AllSources(dir, pattern)
+              for dir in Glob(str(node)+'/*')
+              if dir.isdir()]
+    result += [source
+               for source in Glob(str(node)+'/'+pattern)
+               if source.isfile()]
+    return result
+
 # Build profiles can be used to decrease compile times.
 # You can either specify "disabled_classes", OR
 # explicitly specify "enabled_classes" which disables all other classes.
@@ -39,11 +48,11 @@ env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
 env.Tool('compilation_db')
 # Build lrcpp as a static library
 env.Append(CPPPATH=["src/", "lrcpp/include/"])
-lrcpp_sources = Glob("lrcpp/src/*.cpp")
+lrcpp_sources = env.Glob("lrcpp/src/*.cpp")
 lrcpp_lib = env.StaticLibrary("bin/lrcpp", source=lrcpp_sources)
 
 # Main extension sources
-sources = Glob("src/*.cpp")
+sources = AllSources(node='src', pattern='*.cpp')
 
 if env["target"] in ["editor", "template_debug"]:
     try:
