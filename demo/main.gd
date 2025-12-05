@@ -5,21 +5,22 @@ extends MarginContainer
 
 var retro_player: RetroPlayer = RetroPlayer.new()
 
-var core_name: String = "mame2003_plus_libretro.dll"
+var core_path: String = "C:\\roms\\cores\\"
+var core_name: String = "fbneo_libretro.dll"
 ## mame2003_plus_libretro.dll
 ## fbneo_libretro.dll
 ## vitaquake3_libretro.dll
 ## dosbox_pure_libretro
 ## vice_x64sc_libretro
 
-var core_path: String = "C:\\roms\\cores\\"
-
-var content_name: String = "arcade\\defender.zip"
+var content_path: String = "C:\\roms\\"
+var content_name: String = "arcade\\digdug.zip"
 #ddragon.zip
 #defender.zip
 #digdug.zip"
-var content_path: String = "C:\\roms\\"
+
 var config_path = ProjectSettings.globalize_path("res://assett/mame2003plus.cfg").replace("/", "\\")
+var joy_pad_map = {}
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -45,6 +46,14 @@ func initialize_controllers(id: int, connected: bool) -> void:
 		   	"joypad_name" : Input.get_joy_name(id)
 		}
 		retro_player.input(event)
+		var data: Dictionary = load_json_file("res://assett/retropad_map.json")
+		var joy_name = Input.get_joy_name(id)
+		var joy_pad_key = "default"
+		for key in data.keys():
+			if joy_name.begins_with(key):
+				joy_pad_key = key 
+		
+		joy_pad_map = data.get(joy_pad_key)
 	else:
 		## need to add deinit of joypad
 		pass
@@ -74,9 +83,12 @@ func _input(event: InputEvent) ->void:
 	
 	if event is InputEventJoypadButton:
 		var event_joypad: InputEventJoypadButton = event
+		var pad_button: Dictionary = joy_pad_map.get(str(event_joypad.button_index))
+		var retro_button = pad_button.get("retro_value")
+		print("joypad:", pad_button.get("description"), " Retropad: ", pad_button.get("retro_description"))
 		var joypad_event = {"event" : "InputEventJoypadButton",
 							"device" :event_joypad.device,
-							"button_index" : event_joypad.button_index,
+							"button_index" : retro_button,
 							"pressed" : event_joypad.pressed}
 		retro_player.input(joypad_event)
 		return
@@ -88,3 +100,29 @@ func _input(event: InputEvent) ->void:
 		return
 	
 	retro_player.forward_input(event)
+
+func load_json_file(file_path: String):
+	if not FileAccess.file_exists(file_path):
+		print("Error: File not found at ", file_path)
+		return {}
+
+	var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
+	if FileAccess.get_open_error() != OK:
+		print("Error opening file: ", FileAccess.get_open_error())
+		return {}
+
+	var content: String = file.get_as_text()
+	file.close()
+
+	var json = JSON.new()
+	if json.parse(content) != OK:
+		print("JSON Parse Error: ", json.get_error_message(), " at line ", json.get_error_line())
+		return {}
+
+	if typeof(json.data) == TYPE_DICTIONARY:
+		return json.data
+	else:
+		print("Data not in expected format: ")
+		print(json.data)
+		return {}
+	

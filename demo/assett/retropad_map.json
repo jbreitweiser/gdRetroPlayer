@@ -1,0 +1,109 @@
+{
+"GameSir T3": {
+  "0": {
+	"description": "JOY_BUTTON_A",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_A",
+	"retro_value": 8
+  },
+  "1": {
+	"description": "JOY_BUTTON_B",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_B",
+	"retro_value": 0
+  },
+  "2": {
+	"description": "JOY_BUTTON_X",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_X",
+	"retro_value": 9
+  },
+  "3": {
+	"description": "JOY_BUTTON_Y",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_Y",
+	"retro_value": 1
+  },
+  "4": {
+	"description": "JOY_BUTTON_BACK",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_SELECT",
+	"retro_value": 2
+  },
+  "5": {
+	"description": "JOY_BUTTON_GUIDE",
+	"retro_description": "INVALID",
+	"retro_value": -1
+  },
+  "6": {
+	"description": "JOY_BUTTON_START",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_START",
+	"retro_value": 3
+  },
+  "7": {
+	"description": "JOY_BUTTON_LEFT_STICK",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_L3 ",
+	"retro_value": 14
+  },
+  "8": {
+	"description": "JOY_BUTTON_RIGHT_STICK",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_R3",
+	"retro_value": 15
+  },
+  "9": {
+	"description": "JOY_BUTTON_LEFT_SHOULDER",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_L",
+	"retro_value": 10
+  },
+  "10": {
+	"description": "JOY_BUTTON_RIGHT_SHOULDER",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_R",
+	"retro_value": 11
+  },
+  "11": {
+	"description": "JOY_BUTTON_DPAD_UP",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_UP",
+	"retro_value": 4
+  },
+  "12": {
+	"description": "JOY_BUTTON_DPAD_DOWN",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_DOWN",
+	"retro_value": 5
+  },
+  "13": {
+	"description": "JOY_BUTTON_DPAD_LEFT",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_LEFT",
+	"retro_value": 6
+  },
+  "14": {
+	"description": "JOY_BUTTON_DPAD_RIGHT",
+	"retro_description": "RETRO_DEVICE_ID_JOYPAD_RIGHT",
+	"retro_value": 7
+  },
+  "15": {
+	"description": "JOY_BUTTON_MISC1",
+	"retro_description": "MISC1",
+	"retro_value": 15
+  },
+  "16": {
+	"description": "JOY_BUTTON_PADDLE1",
+	"retro_description": "PADDLE1",
+	"retro_value": 16
+  },
+  "17": {
+	"description": "JOY_BUTTON_PADDLE2",
+	"retro_description": "PADDLE2",
+	"retro_value": 17
+  },
+  "18": {
+	"description": "JOY_BUTTON_PADDLE3",
+	"retro_description": "PADDLE3",
+	"retro_value": 18
+  },
+  "19": {
+	"description": "JOY_BUTTON_PADDLE4",
+	"retro_description": "PADDLE4",
+	"retro_value": 19
+  },
+  "20": {
+	"description": "JOY_BUTTON_TOUCHPAD",
+	"retro_description": "TOUCHPAD",
+	"retro_value": 20
+  }
+}
+}

@@ -25,7 +25,7 @@ void RetroInput::process( const godot::Dictionary &event ){
 
     if(event_type == "InputEventJoypadButton"){
         int32_t device_id = (int32_t)event["device"];
-        godot::JoyButton button_index = (godot::JoyButton)(int)event["button_index"];
+        int button_index = (godot::JoyButton)(int)event["button_index"];
         bool pressed = (bool)event["pressed"];
         process_gamepad(device_id, button_index, pressed);
         return;
@@ -341,7 +341,7 @@ void RetroInput::init_joypads(int32_t device_id, std::string joypad_name) {
 // }
 
 
-void RetroInput::process_gamepad(int32_t device_id, godot::JoyButton button_index, bool pressed) {
+void RetroInput::process_gamepad(int32_t device_id, int button_index, bool pressed) {
     //  
     auto found = _gamepads.find(device_id);
 _logger->info("Game Pad ID %d button %d", device_id, button_index);
@@ -352,31 +352,31 @@ _logger->info("Game Pad ID %d button %d", device_id, button_index);
 
     Gamepad* const gamepad = &found->second;
     unsigned button = 0;
-
-    switch (button_index) {
-        case godot::JoyButton::JOY_BUTTON_A: button = RETRO_DEVICE_ID_JOYPAD_B; break;
-        case godot::JoyButton::JOY_BUTTON_B: button = RETRO_DEVICE_ID_JOYPAD_A; break;
-        case godot::JoyButton::JOY_BUTTON_X: button = RETRO_DEVICE_ID_JOYPAD_Y; break;
-        case godot::JoyButton::JOY_BUTTON_Y: button = RETRO_DEVICE_ID_JOYPAD_X; break;
-        case godot::JoyButton::JOY_BUTTON_BACK: button = RETRO_DEVICE_ID_JOYPAD_SELECT; break;
-        case godot::JoyButton::JOY_BUTTON_START: button = RETRO_DEVICE_ID_JOYPAD_START; break;
-        case godot::JoyButton::JOY_BUTTON_LEFT_STICK: button = RETRO_DEVICE_ID_JOYPAD_L3; break;
-        case godot::JoyButton::JOY_BUTTON_RIGHT_STICK: button = RETRO_DEVICE_ID_JOYPAD_R3; break;
-        case godot::JoyButton::JOY_BUTTON_LEFT_SHOULDER: button = RETRO_DEVICE_ID_JOYPAD_L; break;
-        case godot::JoyButton::JOY_BUTTON_RIGHT_SHOULDER: button = RETRO_DEVICE_ID_JOYPAD_R; break;
-        case godot::JoyButton::JOY_BUTTON_DPAD_UP: button = RETRO_DEVICE_ID_JOYPAD_UP; break;
-        case godot::JoyButton::JOY_BUTTON_DPAD_DOWN: button = RETRO_DEVICE_ID_JOYPAD_DOWN; break;
-        case godot::JoyButton::JOY_BUTTON_DPAD_LEFT: button = RETRO_DEVICE_ID_JOYPAD_LEFT; break;
-        case godot::JoyButton::JOY_BUTTON_DPAD_RIGHT: button = RETRO_DEVICE_ID_JOYPAD_RIGHT; break;
-        case godot::JoyButton::JOY_BUTTON_PADDLE1: button = RETRO_DEVICE_ID_JOYPAD_A; break;
-        case godot::JoyButton::JOY_BUTTON_PADDLE2: button = RETRO_DEVICE_ID_JOYPAD_B; break;
-        case godot::JoyButton::JOY_BUTTON_PADDLE3: button = RETRO_DEVICE_ID_JOYPAD_X; break;
-        case godot::JoyButton::JOY_BUTTON_PADDLE4: button = RETRO_DEVICE_ID_JOYPAD_Y; break;
-        case godot::JoyButton::JOY_BUTTON_GUIDE: // fallthrough
-        default: return;
-    }
+    
+    // switch (button_index) {
+    //     case godot::JoyButton::JOY_BUTTON_A: button = RETRO_DEVICE_ID_JOYPAD_B; break;
+    //     case godot::JoyButton::JOY_BUTTON_B: button = RETRO_DEVICE_ID_JOYPAD_A; break;
+    //     case godot::JoyButton::JOY_BUTTON_X: button = RETRO_DEVICE_ID_JOYPAD_Y; break;
+    //     case godot::JoyButton::JOY_BUTTON_Y: button = RETRO_DEVICE_ID_JOYPAD_X; break;
+    //     case godot::JoyButton::JOY_BUTTON_BACK: button = RETRO_DEVICE_ID_JOYPAD_SELECT; break;
+    //     case godot::JoyButton::JOY_BUTTON_START: button = RETRO_DEVICE_ID_JOYPAD_START; break;
+    //     case godot::JoyButton::JOY_BUTTON_LEFT_STICK: button = RETRO_DEVICE_ID_JOYPAD_L3; break;
+    //     case godot::JoyButton::JOY_BUTTON_RIGHT_STICK: button = RETRO_DEVICE_ID_JOYPAD_R3; break;
+    //     case godot::JoyButton::JOY_BUTTON_LEFT_SHOULDER: button = RETRO_DEVICE_ID_JOYPAD_L; break;
+    //     case godot::JoyButton::JOY_BUTTON_RIGHT_SHOULDER: button = RETRO_DEVICE_ID_JOYPAD_R; break;
+    //     case godot::JoyButton::JOY_BUTTON_DPAD_UP: button = RETRO_DEVICE_ID_JOYPAD_UP; break;
+    //     case godot::JoyButton::JOY_BUTTON_DPAD_DOWN: button = RETRO_DEVICE_ID_JOYPAD_DOWN; break;
+    //     case godot::JoyButton::JOY_BUTTON_DPAD_LEFT: button = RETRO_DEVICE_ID_JOYPAD_LEFT; break;
+    //     case godot::JoyButton::JOY_BUTTON_DPAD_RIGHT: button = RETRO_DEVICE_ID_JOYPAD_RIGHT; break;
+    //     case godot::JoyButton::JOY_BUTTON_PADDLE1: button = RETRO_DEVICE_ID_JOYPAD_A; break;
+    //     case godot::JoyButton::JOY_BUTTON_PADDLE2: button = RETRO_DEVICE_ID_JOYPAD_B; break;
+    //     case godot::JoyButton::JOY_BUTTON_PADDLE3: button = RETRO_DEVICE_ID_JOYPAD_X; break;
+    //     case godot::JoyButton::JOY_BUTTON_PADDLE4: button = RETRO_DEVICE_ID_JOYPAD_Y; break;
+    //     case godot::JoyButton::JOY_BUTTON_GUIDE: // fallthrough
+    //     default: return;
+    // }
 _logger->info("RETRO_DEVICE_ID_JOYPAD button %d", button);
-    gamepad->state[button] = pressed;
+    gamepad->state[button_index] = pressed;
 }
 
 // void RetroInput::process(SDL_ControllerAxisEvent const* event) {

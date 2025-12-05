@@ -45,7 +45,7 @@ protected:
     //void process(SDL_JoyDeviceEvent const* event);
     //void process(SDL_ControllerDeviceEvent const* event);
     // void process(godot::InputEventJoypadButton const* event);
-    void process_gamepad(int32_t device_id, godot::JoyButton button_index, bool pressed);
+    void process_gamepad(int32_t device_id, int button_index, bool pressed);
     void init_joypads(int32_t device_id, std::string joypad_name);
     //void process(SDL_ControllerAxisEvent const* event);
     void process(godot::InputEventKey const* event);
