@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"C:/msys64/home/jbrei/gdRetroPlayer2/build/cmake_install.cmake",
-		"C:/msys64/home/jbrei/gdRetroPlayer2/build/godot-cpp/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

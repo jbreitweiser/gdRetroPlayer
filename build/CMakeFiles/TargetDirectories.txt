@@ -1,8 +1,0 @@
-C:/msys64/home/jbrei/gdRetroPlayer2/build/CMakeFiles/EXTENSION-NAME.dir
-C:/msys64/home/jbrei/gdRetroPlayer2/build/CMakeFiles/generate_doc_source.dir
-C:/msys64/home/jbrei/gdRetroPlayer2/build/CMakeFiles/edit_cache.dir
-C:/msys64/home/jbrei/gdRetroPlayer2/build/CMakeFiles/rebuild_cache.dir
-C:/msys64/home/jbrei/gdRetroPlayer2/build/godot-cpp/CMakeFiles/generate_bindings.dir
-C:/msys64/home/jbrei/gdRetroPlayer2/build/godot-cpp/CMakeFiles/godot-cpp.dir
-C:/msys64/home/jbrei/gdRetroPlayer2/build/godot-cpp/CMakeFiles/edit_cache.dir
-C:/msys64/home/jbrei/gdRetroPlayer2/build/godot-cpp/CMakeFiles/rebuild_cache.dir

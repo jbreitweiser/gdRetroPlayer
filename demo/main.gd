@@ -87,6 +87,7 @@ func _input(event: InputEvent) ->void:
 		var retro_button = pad_button.get("retro_value")
 		print("joypad:", pad_button.get("description"), " Retropad: ", pad_button.get("retro_description"))
 		var joypad_event = {"event" : "InputEventJoypadButton",
+							"port": 0, # We are defaulting to player 1
 							"device" :event_joypad.device,
 							"button_index" : retro_button,
 							"pressed" : event_joypad.pressed}

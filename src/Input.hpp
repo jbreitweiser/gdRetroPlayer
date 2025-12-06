@@ -42,20 +42,17 @@ public:
     virtual void poll() override;
 
 protected:
-    //void process(SDL_JoyDeviceEvent const* event);
-    //void process(SDL_ControllerDeviceEvent const* event);
-    // void process(godot::InputEventJoypadButton const* event);
     void process_gamepad(int32_t device_id, int button_index, bool pressed);
     void init_joypads(int32_t device_id, std::string joypad_name);
-    //void process(SDL_ControllerAxisEvent const* event);
     void process(godot::InputEventKey const* event);
     void process(godot::InputEventMouseButton const* btn_event);
     void process(godot::InputEventMouseMotion const* motion_event);
 
     void reset();
-    void init_joypads();
 
     static unsigned keycodeToLibretro(godot::Key code, godot::KeyLocation location);
+
+    godot::Dictionary controller_info;
 
     struct Gamepad {
         Gamepad();
@@ -65,11 +62,7 @@ protected:
         };
 
         int32_t deviceIndex;
-        //SDL_JoystickID instanceId;
-        //SDL_GameController* controller;
         std::string controllerName;
-        //SDL_Joystick* joystick;
-        std::string joystickName;
         int lastDir[6];
         bool state[16];
         Axes analogs[3];

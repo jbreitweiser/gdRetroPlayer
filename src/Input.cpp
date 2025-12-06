@@ -8,7 +8,7 @@ bool RetroInput::init(lrcpp::Logger* logger) {
     reset();
 
     _logger = logger;
-    init_joypads();
+    // init_joypads();
     _logger->info("Input subsystem Not implemented");
     return true;
 }
@@ -24,17 +24,17 @@ void RetroInput::process( const godot::Dictionary &event ){
     _logger->info("Setting input descriptors");
 
     if(event_type == "InputEventJoypadButton"){
-        int32_t device_id = (int32_t)event["device"];
+        int32_t port_num = (int32_t)event["port"];
         int button_index = (godot::JoyButton)(int)event["button_index"];
         bool pressed = (bool)event["pressed"];
-        process_gamepad(device_id, button_index, pressed);
+        process_gamepad(port_num, button_index, pressed);
         return;
     }
 
     if(event_type == "InitializeControllerEvent") {
-        int32_t device_id = (int32_t)event["device"];
+        int32_t port_num = (int32_t)event["port"];
         godot::String joypad_name = event["joypad_name"];
-        init_joypads(device_id, joypad_name.utf8().get_data());
+        init_joypads(port_num, joypad_name.utf8().get_data());
         return;
     }
 
@@ -56,13 +56,6 @@ void RetroInput::process(godot::InputEvent *event) {
     if (event->is_class("InputEventMouseMotion")) {
         godot::InputEventMouseMotion *motion_event = static_cast<godot::InputEventMouseMotion *>(event);
         process(motion_event);
-        return;
-    }
-
-    if (event->is_class("InputEventAction")) {
-        godot::InputEventAction *action_event = static_cast<godot::InputEventAction *>(event);
-        _logger->warn("InputEventAction %s not implemented", action_event->get_action());
-        //process(action_event);
         return;
     }
 
@@ -117,6 +110,43 @@ bool RetroInput::getInputDeviceCapabilities(uint64_t* capabilities) {
     return true;
 }
 
+/* const struct retro_controller_info * --
+* This environment call lets a libretro core tell the frontend
+* which controller subclasses are recognized in calls to
+* retro_set_controller_port_device().
+*
+* Some emulators such as Super Nintendo support multiple lightgun
+* types which must be specifically selected from. It is therefore
+* sometimes necessary for a frontend to be able to tell the core
+* about a special kind of input device which is not specifcally
+* provided by the Libretro API.
+*
+* In order for a frontend to understand the workings of those devices,
+* they must be defined as a specialized subclass of the generic device
+* types already defined in the libretro API.
+*
+* The core must pass an array of const struct retro_controller_info which
+* is terminated with a blanked out struct. Each element of the
+* retro_controller_info struct corresponds to the ascending port index
+* that is passed to retro_set_controller_port_device() when that function
+* is called to indicate to the core that the frontend has changed the
+* active device subclass. SEE ALSO: retro_set_controller_port_device()
+*
+* The ascending input port indexes provided by the core in the struct
+* are generally presented by frontends as ascending User # or Player #,
+* such as Player 1, Player 2, Player 3, etc. Which device subclasses are
+* supported can vary per input port.
+*
+* The first inner element of each entry in the retro_controller_info array
+* is a retro_controller_description struct that specifies the names and
+* codes of all device subclasses that are available for the corresponding
+* User or Player, beginning with the generic Libretro device that the
+* subclasses are derived from. The second inner element of each entry is the
+* total number of subclasses that are listed in the retro_controller_description.
+*
+* NOTE: Even if special device types are set in the libretro core,
+* libretro should only poll input based on the base input device types.
+*/
 // RETRO_ENVIRONMENT_SET_CONTROLLER_INFO
 // need to record the available controllers and their types
 // so we can respond to state() calls correctly
@@ -140,12 +170,15 @@ bool RetroInput::setControllerInfo(retro_controller_info const* info) {
     return true;
 }
 
+//RETRO_ENVIRONMENT_GET_INPUT_BITMASKS
+// Experimental feature not implemented in gdRetroPlayer2
 bool RetroInput::getInputBitmasks(bool* supports) {
     *supports = false;
     return false;
 }
 
 //  callback from the core to get state of the game pads
+// RETRO_API void retro_set_input_state(retro_input_state_t);  <- Sets the callback to this function
 int16_t RetroInput::state(unsigned port, unsigned device, unsigned index, unsigned id) {
     unsigned const base = device & RETRO_DEVICE_MASK;
 
@@ -189,6 +222,7 @@ int16_t RetroInput::state(unsigned port, unsigned device, unsigned index, unsign
 }
 
 //  Callback from the core to get the state of the keyboard
+//  RETRO_API void retro_set_input_poll(retro_input_poll_t);  <- Sets the callback to this function
 void RetroInput::poll() {
     if (_keyboardCallback.callback != nullptr) {
         for (int i = RETROK_FIRST; i < RETROK_LAST; i++) {
@@ -221,40 +255,6 @@ void RetroInput::poll() {
 //     }
 // }
 
-void RetroInput::init_joypads() {
-    // Get the Input singleton instance
-    godot::Input* input = godot::Input::get_singleton();
-    
-    // Get the list of connected joypad device IDs
-    // The device IDs are typically integers (e.g., 0, 1, 2, ...)
-    godot::TypedArray<int32_t> joypad_devices = input->get_connected_joypads();
-
-    godot::UtilityFunctions::print("Connected Joypads Count: ", joypad_devices.size());
-
-    for (int i = 0; i < joypad_devices.size(); ++i) {
-        int device_id = joypad_devices[i];
-        
-        // Get the name of the joypad
-        godot::String name = input->get_joy_name(device_id);
-        
-        // Get the GUID of the joypad (useful for mapping)
-        godot::String guid = input->get_joy_guid(device_id);
-        
-        // Get platform-specific information (optional)
-        godot::Dictionary info = input->get_joy_info(device_id);
-
-        godot::print_line("Device ID: " + godot::String::num(device_id));
-        godot::print_line("  Name: " + name);
-        godot::print_line("  GUID: " + guid);
-        
-        if (!info.is_empty()) {
-            godot::print_line("  Info: ", info);
-        }
-
-        init_joypads(device_id, name.utf8().get_data());
-    }
-}
-
 void RetroInput::init_joypads(int32_t device_id, std::string joypad_name) {
     
         auto inserted = _gamepads.insert(std::make_pair(device_id, Gamepad()));
@@ -262,10 +262,9 @@ void RetroInput::init_joypads(int32_t device_id, std::string joypad_name) {
 
         gamepad->deviceIndex = device_id;
         gamepad->controllerName = joypad_name;
-        gamepad->joystickName = joypad_name;
 
         _ports.emplace_back(gamepad);
-        _logger->info("Controller %s (%s) added", gamepad->controllerName.c_str(), gamepad->joystickName.c_str());
+        _logger->info("Controller %s added on port %d", gamepad->controllerName.c_str(), gamepad->deviceIndex);
 }
 
 
@@ -342,9 +341,8 @@ void RetroInput::init_joypads(int32_t device_id, std::string joypad_name) {
 
 
 void RetroInput::process_gamepad(int32_t device_id, int button_index, bool pressed) {
-    //  
     auto found = _gamepads.find(device_id);
-_logger->info("Game Pad ID %d button %d", device_id, button_index);
+    
     if (found == _gamepads.end()) {
         _logger->info("Gamepad not present");
         return;
@@ -352,30 +350,6 @@ _logger->info("Game Pad ID %d button %d", device_id, button_index);
 
     Gamepad* const gamepad = &found->second;
     unsigned button = 0;
-    
-    // switch (button_index) {
-    //     case godot::JoyButton::JOY_BUTTON_A: button = RETRO_DEVICE_ID_JOYPAD_B; break;
-    //     case godot::JoyButton::JOY_BUTTON_B: button = RETRO_DEVICE_ID_JOYPAD_A; break;
-    //     case godot::JoyButton::JOY_BUTTON_X: button = RETRO_DEVICE_ID_JOYPAD_Y; break;
-    //     case godot::JoyButton::JOY_BUTTON_Y: button = RETRO_DEVICE_ID_JOYPAD_X; break;
-    //     case godot::JoyButton::JOY_BUTTON_BACK: button = RETRO_DEVICE_ID_JOYPAD_SELECT; break;
-    //     case godot::JoyButton::JOY_BUTTON_START: button = RETRO_DEVICE_ID_JOYPAD_START; break;
-    //     case godot::JoyButton::JOY_BUTTON_LEFT_STICK: button = RETRO_DEVICE_ID_JOYPAD_L3; break;
-    //     case godot::JoyButton::JOY_BUTTON_RIGHT_STICK: button = RETRO_DEVICE_ID_JOYPAD_R3; break;
-    //     case godot::JoyButton::JOY_BUTTON_LEFT_SHOULDER: button = RETRO_DEVICE_ID_JOYPAD_L; break;
-    //     case godot::JoyButton::JOY_BUTTON_RIGHT_SHOULDER: button = RETRO_DEVICE_ID_JOYPAD_R; break;
-    //     case godot::JoyButton::JOY_BUTTON_DPAD_UP: button = RETRO_DEVICE_ID_JOYPAD_UP; break;
-    //     case godot::JoyButton::JOY_BUTTON_DPAD_DOWN: button = RETRO_DEVICE_ID_JOYPAD_DOWN; break;
-    //     case godot::JoyButton::JOY_BUTTON_DPAD_LEFT: button = RETRO_DEVICE_ID_JOYPAD_LEFT; break;
-    //     case godot::JoyButton::JOY_BUTTON_DPAD_RIGHT: button = RETRO_DEVICE_ID_JOYPAD_RIGHT; break;
-    //     case godot::JoyButton::JOY_BUTTON_PADDLE1: button = RETRO_DEVICE_ID_JOYPAD_A; break;
-    //     case godot::JoyButton::JOY_BUTTON_PADDLE2: button = RETRO_DEVICE_ID_JOYPAD_B; break;
-    //     case godot::JoyButton::JOY_BUTTON_PADDLE3: button = RETRO_DEVICE_ID_JOYPAD_X; break;
-    //     case godot::JoyButton::JOY_BUTTON_PADDLE4: button = RETRO_DEVICE_ID_JOYPAD_Y; break;
-    //     case godot::JoyButton::JOY_BUTTON_GUIDE: // fallthrough
-    //     default: return;
-    // }
-_logger->info("RETRO_DEVICE_ID_JOYPAD button %d", button);
     gamepad->state[button_index] = pressed;
 }
 
@@ -662,9 +636,6 @@ unsigned RetroInput::keycodeToLibretro(godot::Key code, godot::KeyLocation locat
 
 RetroInput::Gamepad::Gamepad() {
     deviceIndex = 0;
-    // instanceId = 0;
-    // controller = nullptr;
-    // joystick = nullptr;
 
     lastDir[0] = 0; lastDir[1] = 0; lastDir[2] = 0;
     lastDir[3] = 0; lastDir[4] = 0; lastDir[5] = 0;

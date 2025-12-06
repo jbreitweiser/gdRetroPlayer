@@ -5,3 +5,4 @@ CompileFlags:
     - -g2
   Add:
     - -std=gnu++17
+
