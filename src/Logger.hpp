@@ -2,9 +2,8 @@
 
 #include <lrcpp/Components.h>
 
-#include <godot_cpp\variant\utility_functions.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 #include <cstdarg>
-#include <cstdio>
 
 /*  Log Levels,  Using the libretro levels for compatibility
 

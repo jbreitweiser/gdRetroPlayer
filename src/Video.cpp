@@ -1,4 +1,5 @@
 #include "Video.hpp"
+#include "render_surfaces/RenderSurfaceFactory.hpp"
 
 Video::Video() {
     reset();

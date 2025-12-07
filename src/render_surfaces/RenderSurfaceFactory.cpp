@@ -1,4 +1,6 @@
 #include "RenderSurfaceFactory.hpp"
+#include "TextureRectRenderer.hpp"
+#include "BaseMaterial3DRenderer.hpp"
 
 RenderSurface* RenderSurfaceFactory::createRenderer(Node* node) {
 

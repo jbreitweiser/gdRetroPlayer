@@ -1,6 +1,5 @@
 #include "CpuId.hpp"
 
-#include <time.h>
 #include "../external/libcpuid/libcpuid.h"
 #include "DynLib.hpp"
 

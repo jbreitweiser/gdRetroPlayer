@@ -4,8 +4,6 @@
 
 #include <lrcpp/Components.h>
 
-#include <string>
-#include <vector>
 #include <stdint.h>
 #include <godot_cpp/variant/packed_vector2_array.hpp>
 #include <godot_cpp/variant/vector2.hpp>

@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Config.hpp"
-#include "render_surfaces/RenderSurfaceFactory.hpp"
+#include "render_surfaces/RenderSurface.hpp"
 
-#include <vector>
 #include <cstdint>
 
 #include <godot_cpp/classes/image.hpp>

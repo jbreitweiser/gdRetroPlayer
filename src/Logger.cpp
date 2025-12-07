@@ -1,4 +1,5 @@
 #include "Logger.hpp"
+#include <cstdio>
 
 void Logger::setLevel(retro_log_level level) {
     _priority = level;

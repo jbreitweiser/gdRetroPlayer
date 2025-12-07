@@ -2,8 +2,7 @@
 
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 
-#include "TextureRectRenderer.hpp"
-#include "BaseMaterial3DRenderer.hpp"
+#include "RenderSurface.hpp"
 
 using namespace godot;
 
