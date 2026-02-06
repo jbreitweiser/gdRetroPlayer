@@ -1,4 +1,5 @@
 #include "Config.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 
 #include <string.h>
 #include <stdlib.h>
@@ -32,6 +33,9 @@ bool Config::init(std::vector<std::string> const& configPaths,
             return false;
         }
     }
+
+    _contentPath = contentPath;
+    _corePath = corePath;
 
     if (!getDirectory(contentPath, &_contentDir)) {
         return false;
@@ -110,17 +114,34 @@ bool Config::getOption(char const* key, bool* value) const {
     return true;
 }
 
+std::string Config::getContentPath() const {
+    return _contentPath;
+}
+
+std::string Config::getCorePath() const {
+    return _corePath;
+}
+
+godot::Array Config::getCoreOptions() const {
+    return _core_options;
+}
+
+//##  Function calls for libretro environment callbacks
+
+// RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL
 bool Config::setPerformanceLevel(unsigned level) {
     (void)level;
     _logger->warn("RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL not implemented.  Level at %u", level);
     return false;
 }
 
+// RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY
 bool Config::getSystemDirectory(char const** directory) {
     *directory = _coreDir.c_str();
     return true;
 }
 
+// RETRO_ENVIRONMENT_GET_VARIABLE
 bool Config::getVariable(retro_variable* variable) {
     auto const found = _options.find(variable->key);
 
@@ -135,6 +156,7 @@ bool Config::getVariable(retro_variable* variable) {
     return false;
 }
 
+// RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE
 bool Config::getVariableUpdate(bool* const updated) {
     *updated = _optionsUpdated;
     _optionsUpdated = false;
@@ -211,6 +233,26 @@ bool Config::getFastForwarding(bool* is) {
     return true;
 }
 
+// struct retro_core_option_definition
+// {
+//    /* Variable to query in RETRO_ENVIRONMENT_GET_VARIABLE. */
+//    const char *key;
+
+//    /* Human-readable core option description (used as menu label) */
+//    const char *desc;
+
+//    /* Human-readable core option information (used as menu sublabel) */
+//    const char *info;
+
+//    /* Array of retro_core_option_value structs, terminated by NULL */
+//    struct retro_core_option_value values[RETRO_NUM_CORE_OPTION_VALUES_MAX];
+
+//    /* Default core option value. Must match one of the values
+//     * in the retro_core_option_value array, otherwise will be
+//     * ignored */
+//    const char *default_value;
+// };
+// RETRO_ENVIRONMENT_SET_CORE_OPTIONS
 bool Config::setCoreOptions(retro_core_option_definition const* options) {
     _logger->info("Setting core options");
 
@@ -219,6 +261,20 @@ bool Config::setCoreOptions(retro_core_option_definition const* options) {
 
         if (found == _options.end()) {
             _options.emplace(options->key, options->default_value);
+            godot::Dictionary option;
+            option["key"] = options->key;
+            option["desc"] = options->desc;
+            option["info"] = options->info;
+            godot::Array values;
+            for (auto const& val : options->values) {
+                if (val.value == nullptr) {
+                    break;
+                }
+                values.append(val.value);
+            }
+            option["values"] = values;
+            option["default_value"] = options->default_value;
+            _core_options.append(option);
         }
 
         _logger->info("    %s set to \"%s\"", options->key, _options[options->key].c_str());
@@ -227,11 +283,13 @@ bool Config::setCoreOptions(retro_core_option_definition const* options) {
     return true;
 }
 
+// RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL
 bool Config::setCoreOptionsIntl(retro_core_options_intl const* intl) {
     _logger->warn("Using English for the core options");
     return setCoreOptions(intl->us);
 }
 
+// RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY
 bool Config::setCoreOptionsDisplay(retro_core_option_display const* display) {
     (void)display;
     _logger->warn("RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY not implemented");
@@ -287,6 +345,19 @@ bool Config::getDirectory(char const* path, std::string* directory) {
     }
 
     _logger->debug("Directory for \"%s\" is \"%s\"", path, directory->c_str());
+    return true;
+}
+
+bool Config::setOption(std::string const& key, std::string const& value) {
+    if (_options.find(key) != _options.end()) {
+        _logger->warn("Duplicated key \"%s\"", key.c_str());
+        _options[key] =  value;
+    }
+    else {
+        _logger->debug("Adding key \"%s\" with value \"%s\"", key.c_str(), value.c_str());
+        _options.emplace(key, value);
+    }
+    _optionsUpdated = true;
     return true;
 }
 

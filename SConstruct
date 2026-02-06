@@ -50,6 +50,7 @@ env.Tool('compilation_db')
 env.Append(CPPPATH=["src/", "lrcpp/include/"])
 lrcpp_sources = env.Glob("lrcpp/src/*.cpp")
 lrcpp_lib = env.StaticLibrary("bin/lrcpp", source=lrcpp_sources)
+env.Append(LIBS=["z"])
 
 # Main extension sources
 sources = AllSources(node='src', pattern='*.cpp')

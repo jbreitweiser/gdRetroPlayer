@@ -17,7 +17,6 @@ bool Video::init(Config* config, lrcpp::Logger* logger) {
     reset();
 
     _logger = logger;
-    _logger->info("[Video::init] Video subsystem initialized");
 
     return true;
 }
@@ -32,12 +31,12 @@ double Video::getCoreFps() const {
 }
 
 void Video::clear() {
-    _logger->debug("Video::clear");
+   // _logger->debug("Video::clear");
 }
 
 // Copy data from intermediary buffer to Image buffer and update TextureRect
 void Video::present() {
-    _renderer->present(&_intermediary_buffer);
+    _renderer->present(&_intermediary_buffer, _frameWidth, _frameHeight, _rotation);
 }
 
 
@@ -50,10 +49,6 @@ void Video::set_render_surface(godot::Node *node) {
 //  Rename to set render surface and use class name to determine which render class to apply
 void Video::set_texture_rect(godot::TextureRect *rect) {
     set_render_surface((godot::Node*) rect); 
-    // TextureRectRenderer* renderer = new TextureRectRenderer();
-    // renderer->setTextureRect(rect);
-    // renderer->init(_logger);
-    // _renderer = (RenderSurface*)renderer;
 
 }
 
@@ -131,20 +126,17 @@ bool Video::setGeometry(retro_game_geometry const* geometry) {
     godot::Image::Format format = godot::Image::Format::FORMAT_RGB565;
 
     _aspectRatio = geometry->aspect_ratio;
-    _textureWidth = geometry->base_width;
-    _textureHeight = geometry->base_height;
+    _frameWidth = geometry->base_width;
+    _frameHeight = geometry->base_height;
+    _textureWidth = geometry->max_width;
+    _textureHeight = geometry->max_height;
 
     // If aspect ratio is not set, calculate it
     if (_aspectRatio <= 0) {
         _aspectRatio = (float)geometry->base_width / (float)geometry->base_height;
     }
 
-    // Adjust width and height for rotation
-    if(_rotation == 1 || _rotation == 3) {
-        std::swap(_textureWidth, _textureHeight);
-    }
-
-    // return _renderer->setFrameBuffer(_textureWidth, _textureHeight);
+    return _renderer->setFrameBuffer(_frameWidth, _frameHeight);
     return false;
 }
 
@@ -200,16 +192,11 @@ void Video::refresh(void const* data, unsigned width, unsigned height, size_t pi
     {
         return;
     }
+    _pitch = pitch;
+    _frameWidth = width;
+    _frameHeight = height;
 
-    _textureWidth = width;
-    _textureHeight = height;
-
-    // Adjust width and height for rotation
-    if(_rotation == 1 || _rotation == 3) {
-        std::swap(_textureWidth, _textureHeight);
-    }
-
-    if(!_renderer->setFrameBuffer(_textureWidth, _textureHeight)) {
+    if(!_renderer->setFrameBuffer(_frameWidth, _frameHeight)) {
         return;
     }
 
@@ -227,7 +214,7 @@ void Video::refresh(void const* data, unsigned width, unsigned height, size_t pi
             // supports RGBA8888 We need to swap the first and last bytes, so alpha is the last byte
             // to get accurate color
             uint32_t *data32 = (uint32_t *)data;
-            for ( unsigned i = 0; i < width * height; i++ )
+            for ( unsigned i = 0; i < (_pitch/channels) * _frameHeight; i++ )
             {
                 uint32_t pixel = data32[i];
                 // Force alpha to fully opaque (1.0 -> 255) so Godot receives an opaque image
@@ -245,61 +232,39 @@ void Video::refresh(void const* data, unsigned width, unsigned height, size_t pi
     }
 
     frame_count++;
-    buffer_size = width * height * channels;
-    _intermediary_buffer.resize( buffer_size );
+    // depending on rotation the pitch needs to change.  
+    // The passed pitch will change if the width and height change.
+    int dest_pitch = width * channels;
+    buffer_size = dest_pitch * height;
 
-    if(_rotation > 0) {
-        rotateImage((unsigned char*)data, (unsigned char*)_intermediary_buffer.ptr(), width, height, channels, 4 - _rotation);
+    if (buffer_size > _intermediary_buffer.size()) {
+        _intermediary_buffer.resize( buffer_size );
     }
-    else {
-        memcpy( (void *)_intermediary_buffer.ptr(), data, buffer_size );
-    }
+
+    copy_frame_to_buffer(data, pitch, _intermediary_buffer, 
+                        dest_pitch, width, height);
+    
 }
 
-// Rotate raw image data (RGBA or any channel count)
-void Video::rotateImage(
-    const unsigned char* source_buffer, 
-    unsigned char* dest_buffer,
-    unsigned int width,
-    unsigned int height,
-    unsigned int channels,
-    unsigned int rotation
-) {
-    int newWidth = (rotation == ROTATE_90 || rotation == ROTATE_270) ? height : width;
-    int newHeight = (rotation == ROTATE_90 || rotation == ROTATE_270) ? width : height;
+void Video::copy_frame_to_buffer(void const* src_data,
+                                int src_pitch,
+                                godot::PackedByteArray &dest_buffer,
+                                int dst_pitch,
+                                int frame_width,
+                                int frame_height)
+{
+    // Get destination buffer
+    uint8_t *dst_ptr = dest_buffer.ptrw();
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            // Source pixel index
-            int srcIndex = (y * width + x) * channels;
+    const uint8_t *src_buffer = (const uint8_t *)src_data;
 
-            int dstX, dstY;
-            switch (rotation) {
-                case ROTATE_90: // 90 degrees
-                    dstX = height - 1 - y;
-                    dstY = x;
-                    break;
-                case ROTATE_180: // 180 degrees
-                    dstX = width - 1 - x;
-                    dstY = height - 1 - y;
-                    break;
-                case ROTATE_270: // 270 degrees
-                    dstX = y;
-                    dstY = width - 1 - x;
-                    break;
-            }
+    for (int y = 0; y < frame_height; y++) {
+        const uint8_t *src_row = src_buffer + y * src_pitch;
+        uint8_t *dst_row = dst_ptr + y * dst_pitch;
 
-            // Destination pixel index
-            int dstIndex = (dstY * newWidth + dstX) * channels;
-
-            // Copy pixel (all channels)
-            for (int c = 0; c < channels; ++c) {
-                dest_buffer[dstIndex + c] = source_buffer[srcIndex + c];
-            }
-        }
+        // Copy only the visible width, not the padded pitch
+        memcpy(dst_row, src_row, dst_pitch);
     }
-
-    return;
 }
 
 uintptr_t Video::getCurrentFramebuffer() {

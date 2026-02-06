@@ -61,6 +61,12 @@ public:
 
 protected:
     void rotateImage(const unsigned char* source_buffer, unsigned char* dest_buffer, unsigned int width, unsigned int height, unsigned int channels, unsigned int rotation);
+    void copy_frame_to_buffer(void const* src_data,
+                            int src_pitch,
+                            godot::PackedByteArray &dest_buffer,
+                            int dst_pitch,
+                            int width,
+                            int height);
     void reset();
     int frame_count = 0;
     lrcpp::Logger* _logger;
@@ -70,8 +76,11 @@ protected:
     float _aspectRatio;  // aspect ratio
     unsigned _textureWidth;  // requested width
     unsigned _textureHeight;  // requested height
+    unsigned _frameWidth;  // requested width
+    unsigned _frameHeight;  // requested height
     unsigned _lastTextureWidth;  // last width
     unsigned _lastTextureHeight;  // last height
+    size_t _pitch;
 
     retro_pixel_format _pixelFormat;
     double _coreFps;

@@ -13,7 +13,7 @@ public:
 
     bool init(lrcpp::Logger* logger) override;
     void destroy() override;
-    void present(godot::PackedByteArray* intermediary_buffer) override; 
+    void present(godot::PackedByteArray* intermediary_buffer, unsigned width, unsigned height, unsigned rotation) override; 
     bool setPixelFormat(godot::Image::Format format) override;
     bool setFrameBuffer(unsigned usedWidth, unsigned usedHeight) override;
     godot::Image::Format get_format() override; 

@@ -72,13 +72,14 @@ godot::Image::Format BaseMaterial3DRenderer::get_format() {
 }
 
 // Copy data from intermediary buffer to Image buffer and update TextureRect
-void BaseMaterial3DRenderer::present(godot::PackedByteArray* intermediary_buffer) {
+void BaseMaterial3DRenderer::present(godot::PackedByteArray* intermediary_buffer, unsigned width, unsigned height, unsigned rotation) {
     if (_frame_buffer.is_null() || !_frame_buffer.is_valid()) {
         return;
     }
 
     // Update internal Image with the latest pixel data
-    _frame_buffer->set_data(_frame_buffer->get_width(), _frame_buffer->get_height(), false, _frame_buffer->get_format(), *intermediary_buffer);
+    _frame_buffer->fill(godot::Color(0, 0, 0, 0));
+    _frame_buffer->set_data(width, height, false, _frame_buffer->get_format(), *intermediary_buffer);
 
     // Ensure we have an ImageTexture to update
     if (_image_texture.is_null() || !_image_texture.is_valid()) {

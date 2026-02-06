@@ -6,8 +6,8 @@ extends MarginContainer
 var retro_player: RetroPlayer = RetroPlayer.new()
 
 var core_path: String = "C:\\roms\\cores\\"
-var core_name: String = "fbneo_libretro.dll"
-## mame2003_plus_libretro.dll
+#var core_name: String = "stella2023_libretro.dll" 
+var core_name: String = "mame2003_plus_libretro.dll"
 ## fbneo_libretro.dll
 ## vitaquake3_libretro.dll
 ## dosbox_pure_libretro
@@ -15,11 +15,12 @@ var core_name: String = "fbneo_libretro.dll"
 
 var content_path: String = "C:\\roms\\"
 var content_name: String = "arcade\\digdug.zip"
-#ddragon.zip
-#defender.zip
-#digdug.zip"
+#var content_name: String = "arcade\\ddragon.zip"
+#var content_name: String = "arcade\\defender.zip"
+#var content_name: String = "Atari - 2600\\3-D Genesis (USA) (Proto).a26"
 
-var config_path = ProjectSettings.globalize_path("res://assett/mame2003plus.cfg").replace("/", "\\")
+
+var config_path = core_path + core_name + ".ini"  ###= ProjectSettings.globalize_path("res://assett/mame2003plus.cfg").replace("/", "\\")
 var joy_pad_map = {}
 
 # Called when the node enters the scene tree for the first time.
@@ -36,7 +37,39 @@ func _ready() -> void:
 	## Initialize the core and selected content
 	retro_player.set_render_surface(texture_rect)
 	retro_player.set_audio_player(audio_stream_player_2d)
-	retro_player.player_init([config_path], core_path + core_name, content_path + content_name, 2) 
+	
+	retro_player.set_config([], core_path + core_name, content_path + content_name, 0)
+	
+	var config_found = set_core_options()
+	var core_info: Dictionary = retro_player.load_core()
+	
+	retro_player.load_content()
+	
+	if !config_found:
+		var config: ConfigFile = ConfigFile.new()
+		var core_options: Array = retro_player.get_core_options()
+		for core_option in core_options:
+			config.set_value("", core_option["key"], core_option["default_value"])
+			config.set_value(core_option["key"], "desc", core_option["desc"])
+			config.set_value(core_option["key"], "info", core_option["info"])
+			config.set_value(core_option["key"], "values", core_option["values"])
+			config.set_value(core_option["key"], "default_value", core_option["default_value"])
+		if !core_info.is_empty():
+			config.set_value("Core Info", "core_info", core_info)
+		
+		config.save(config_path)
+		
+
+func set_core_options() -> bool:
+	var config: ConfigFile = ConfigFile.new()
+	
+	if OK == config.load(config_path):
+		for key in config.get_section_keys(""):
+			if config.get_value("", key):
+				retro_player.set_option(key, config.get_value("", key))
+		return true
+	else:
+		return false
 
 func initialize_controllers(id: int, connected: bool) -> void:
 	if connected:
@@ -64,6 +97,7 @@ func _process(_delta: float) -> void:
 		get_tree().quit()
 	else:
 		retro_player.run()
+		pass
 
 
 ##  The input method will accept the input event as a dictionary object

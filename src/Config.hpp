@@ -1,7 +1,9 @@
 #pragma once
 
 #include <lrcpp/Components.h>
-
+#include <godot_cpp/variant/array.hpp>
+#include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/variant/variant.hpp>
 #include <vector>
 #include <map>
 #include <string>
@@ -14,9 +16,13 @@ public:
     bool init(std::vector<std::string> const& configPaths, char const* contentPath, char const* corePath, lrcpp::Logger* logger);
     void destroy();
 
+    bool setOption(std::string const& key, std::string const& value);
     bool getOption(char const* key, char const** value) const;
     bool getOption(char const* key, unsigned long* value) const;
     bool getOption(char const* key, bool* value) const;
+    std::string getContentPath() const;
+    std::string getCorePath() const;
+    godot::Array getCoreOptions() const;
 
     // lrcpp::Config
     virtual bool setPerformanceLevel(unsigned level) override;
@@ -48,9 +54,13 @@ protected:
     lrcpp::Logger* _logger;
 
     std::string _contentDir;
+    std::string _contentPath;
     std::string _coreDir;
+    std::string _corePath;
     bool _supportsNoGame;
 
     std::map<std::string, std::string> _options;
     bool _optionsUpdated;
+
+    godot::Array _core_options;
 };

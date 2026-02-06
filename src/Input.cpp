@@ -8,8 +8,6 @@ bool RetroInput::init(lrcpp::Logger* logger) {
     reset();
 
     _logger = logger;
-    // init_joypads();
-    _logger->info("Input subsystem Not implemented");
     return true;
 }
 
@@ -20,8 +18,6 @@ void RetroInput::destroy() {
 void RetroInput::process( const godot::Dictionary &event ){
 
     godot::String event_type = (godot::String)event["event"];
-
-    _logger->info("Setting input descriptors");
 
     if(event_type == "InputEventJoypadButton"){
         int32_t port_num = (int32_t)event["port"];

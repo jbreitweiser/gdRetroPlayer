@@ -1,4 +1,5 @@
 #include "TextureRectRenderer.hpp"
+#include <cstring>
 
 TextureRectRenderer::TextureRectRenderer() {};
 
@@ -12,7 +13,7 @@ bool TextureRectRenderer::init(lrcpp::Logger* logger) {
 void TextureRectRenderer::destroy() {
     _frame_buffer.unref();
     _image_texture.unref();
-    _usedWidth = _usedHeight = 0;
+    _bufferWidth = _bufferHeight = 0;
 }
 
 void TextureRectRenderer::setTextureRect(godot::TextureRect *rect) {
@@ -24,10 +25,10 @@ void TextureRectRenderer::setTextureRect(godot::TextureRect *rect) {
 }
 
 //  Reset framebuffer definition if there is a change in size
-bool TextureRectRenderer::setFrameBuffer(unsigned usedWidth, unsigned usedHeight) {
+bool TextureRectRenderer::setFrameBuffer(unsigned bufferWidth, unsigned bufferHeight) {
     // If we already have a frame buffer, check if size matches
     if (_frame_buffer != nullptr) {
-        if (usedWidth == _usedWidth && _usedHeight == usedHeight) {
+        if (bufferWidth == _bufferWidth && bufferHeight == _bufferHeight) {
             return true;
         }
 
@@ -36,16 +37,15 @@ bool TextureRectRenderer::setFrameBuffer(unsigned usedWidth, unsigned usedHeight
         _image_texture.unref();
     }
     
-    _frame_buffer = godot::Image::create( usedWidth, usedHeight, false, _textureFormat );
-    // _intermediary_buffer.resize( _usedWidth * _usedHeight * _channels );
+    _bufferWidth = bufferWidth;
+    _bufferHeight = bufferHeight;
 
+    _frame_buffer = godot::Image::create( _bufferWidth, _bufferHeight, false, _textureFormat );
+    
     if (_frame_buffer == nullptr) {
         _logger->error("[Video::setGeometry] _frame_buffer failed: to create");
         return false;
     }
-
-    _usedWidth = usedWidth;
-    _usedHeight = usedHeight;
 
     return true;
 }
@@ -72,13 +72,29 @@ godot::Image::Format TextureRectRenderer::get_format() {
 }
 
 // Copy data from intermediary buffer to Image buffer and update TextureRect
-void TextureRectRenderer::present(godot::PackedByteArray* intermediary_buffer) {
+void TextureRectRenderer::present(godot::PackedByteArray* intermediary_buffer, 
+                            unsigned width, 
+                            unsigned height, 
+                            unsigned rotation) {
     if (_frame_buffer.is_null() || !_frame_buffer.is_valid()) {
         return;
     }
 
     // Update internal Image with the latest pixel data
-    _frame_buffer->set_data(_frame_buffer->get_width(), _frame_buffer->get_height(), false, _frame_buffer->get_format(), *intermediary_buffer);
+    _frame_buffer->set_data(width, height, false, _frame_buffer->get_format(), *intermediary_buffer);
+
+    // Apply rotation if needed
+    switch (rotation) {
+        case 1: // 90 degrees
+            _frame_buffer->rotate_90(godot::COUNTERCLOCKWISE);
+            break;
+        case 2: // 180 degrees
+            _frame_buffer->rotate_180();
+            break;
+        case 3: // 270 degrees
+            _frame_buffer->rotate_90(godot::CLOCKWISE);
+            break;
+    }
 
     // Ensure we have an ImageTexture to update
     if (_image_texture.is_null() || !_image_texture.is_valid()) {

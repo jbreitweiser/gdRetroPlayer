@@ -31,6 +31,13 @@ public:
     bool init(std::vector<std::string> const& configPaths, char const* corePath, char const* contentPath, int verboseness);
     // Godot-facing wrapper that accepts Godot types and converts them to STL types
     bool player_init(const PackedStringArray &configPaths, const godot::String &corePath, const godot::String &contentPath, int verboseness);
+    bool set_config(const godot::PackedStringArray &configPaths, const godot::String &corePath, const godot::String &contentPath, int verboseness);
+    bool set_option(godot::String const& key, godot::String const& value);
+    godot::Array get_core_options();
+    bool retro_init();
+    void set_log_level(int verboseness);
+    Dictionary load_core();
+    bool load_content();
     void destroy();
     void run();
     void forwarded_input( const Ref<InputEvent> &event );
@@ -40,10 +47,10 @@ public:
     void set_render_surface(godot::Node *node);
     void set_audio_player(Node *player);
 
-
-
 protected:
     bool _initialized = false;
+    bool _core_loaded = false;
+    bool _content_loaded = false;
     bool done = false;
     void const* readAll(char const* path, size_t* size);
     bool loadCore(char const *path);
@@ -58,6 +65,8 @@ protected:
 
     lrcpp::Core _core;
     DynLib _dynlib;
+
+    Dictionary _system_info = Dictionary();
 
     static void _bind_methods();
     
